@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.admmtd.dao.AdmMtdDao">
+
+	<!--  목록 조회 -->
+		<select id="resourcelist" resultType="kr.happyjob.study.admmtd.model.ResourceModel">
+					/*kr.happyjob.study.admmtd.dao.AdmMtdDao.resourcelist*/
+					
+					        select   it.item_no
+					        			,it.item_nm
+					        			,it.item_vol
+					        			,it.item_etc
+					        			,rm.rm_name as room_no
+					     	     from tb_item it
+					        				inner join tb_room rm on  it.room_no = rm.room_no
+					        				
+	          <where>		        				
+					       <if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'lec'.toString()">
+						 rm.rm_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<when
+						test="searchKey eq 'item'.toString()">
+						and it.item_nm LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						 and (   rm.rm_name Like CONCAT('%', #{sname}, '%')
+						       or it.item_nm LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>		 				
+				</where>					       				
+				    
+						ORDER BY  rm.rm_name 
+						LIMIT #{pageindex}, #{pageSize}
+					         
+				</select>
+				
+				
+				<select id="resourceselectone"  resultType="kr.happyjob.study.admmtd.model.ResourceModel">
+				       select  it.item_nm
+			        	         ,it.item_vol
+			        			 ,it.item_etc
+			        			 ,rm.room_no
+			        			 ,it.item_no
+			        			 ,rm.rm_name		        	
+			
+					          from tb_item it
+					               		inner join tb_room rm on  it.room_no = rm.room_no
+					    		    where  it.item_no =  #{item_no}               
+			    	</select>
+			    	
+			    	
+	
+			    	
+			    	
+			    	<select id="countresourcelist" resultType="int">
+	
+						select count(*)
+			        		  from tb_item it
+			              		inner join tb_room rm on  it.room_no = rm.room_no
+			              		
+						  <where>		        				
+								       <if test="(sname != null) and (!sname.equals(''))">
+							<choose>
+								<when
+									test="searchKey eq 'lec'.toString()">
+									 rm.rm_name Like CONCAT('%', #{sname}, '%')
+								</when>
+								<when
+									test="searchKey eq 'item'.toString()">
+									and it.item_nm LIKE CONCAT('%', #{sname}, '%')
+								</when>
+								<otherwise>
+									 and (   rm.rm_name Like CONCAT('%', #{sname}, '%')
+									       or it.item_nm LIKE CONCAT('%', #{sname}, '%')
+									       )
+								</otherwise>
+							</choose>
+						</if>		 				
+				</where>		
+
+    			
+				 </select>
+	
+	
+	
+	
+	
+	
+	<insert id="iteminsert">
+	
+								    <selectKey resultType="int" keyProperty="no" order="BEFORE">
+							             select ifnull(max(item_no),0) + 1 from tb_item
+							        </selectKey>   
+							        
+								    insert into tb_item
+								             (
+								               	   item_no
+								                  ,item_nm
+								                  ,item_vol
+								                  ,item_etc
+								                  ,room_no
+	
+								             )
+								             
+								    values (
+								    
+								                #{no}
+								               ,#{item_nm} 
+								               ,#{item_vol}
+								               ,#{item_etc}
+								               ,#{room_no}
+								
+								               )			            		   
+					</insert>	
+					
+					
+					
+					<update id="itemupdate">
+						    update tb_item
+						         set  item_no =  #{item_no}  
+						              , item_nm =  #{item_nm}   
+					      	          , item_vol =  #{item_vol}   
+					     	           , item_etc =  #{item_etc}      
+					         	      , room_no =  #{room_no}      
+							     where  item_no =  #{item_no}  
+						</update>
+						
+							<delete id="itemdelete">
+							    delete from tb_item
+							    where  item_no =  #{item_no}  
+							</delete>
+	
+	
+	
+	
+	
+</mapper>

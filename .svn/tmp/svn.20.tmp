@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.study.rsvrem.dao.RsvremDao">
+
+	
+
+	<select id="bookingList" resultType="kr.happyjob.study.rsvrem.model.ReservationModel">
+	
+		
+		select * from tb_study_booking sb
+inner join tb_userinfo ON tb_userinfo.loginID = sb.loginID where book_date = #{date}
+	</select>
+	
+		<select id="selectBoxSet" resultType="kr.happyjob.study.rsvrem.model.StudyroomModel">
+		select * from tb_studyroom
+	</select>
+
+		<select id="roomList" resultType="kr.happyjob.study.rsvrem.model.StudyroomModel">
+		select * from tb_studyroom
+	</select>
+
+	<!-- 중복이 존재하는지 체크 -->
+ 	<select id="checksameTime" resultType ="int">
+		 
+		select count(*) as cnt from tb_study_booking where book_start <![CDATA[<]]>  date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')
+		and book_end  <![CDATA[>]]>   date_format(#{startTime},  '%Y-%m-%d %H:%i:%s') and sturm_no = #{room_no}
+	</select>  
+	
+	<select id="check_sameTime_otherRoom" resultType ="int">
+		 
+		select count(*) as cnt from tb_study_booking where book_start <![CDATA[<]]>  date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')
+		and book_end  <![CDATA[>]]>   date_format(#{startTime},  '%Y-%m-%d %H:%i:%s') and loginID = #{loginID}
+	</select>  
+	
+	<!-- 나의 예약현황 -->
+
+	<select id="myBookingList" resultType="kr.happyjob.study.rsvrem.model.ReservationModel">
+	
+		
+			select	 *	       
+		
+		from tb_study_booking sb
+		inner join tb_studyroom sr on sr.sturm_no = sb.sturm_no
+		 where loginID = #{loginID} and book_date <![CDATA[>=]]> #{today}
+		 
+	</select>
+	
+
+	 	<select id="countMyBookingList" resultType ="int">
+		 
+	select count(*)
+	
+	 from tb_study_booking sb
+	   inner join tb_studyroom sr on sr.sturm_no = sb.sturm_no
+	where loginID = #{loginID} and book_date <![CDATA[>=]]> #{today}
+
+	</select>  
+	
+	<insert id="bookInsert"> 
+	<!-- before insert문ㅅ닐행전에 쿼리문실행해라. --> <!-- no라는 변수를 형성함. -->
+	    <selectKey resultType="int" keyProperty="no" order="BEFORE"> <!-- order before/after -->
+          select ifnull(max(book_no),0) + 1 from tb_study_booking
+        </selectKey>   
+	
+		insert into tb_study_booking
+			(
+				book_no
+				,loginID
+				,sturm_no
+				,book_start
+				,book_end
+				,book_per_cnt
+				,startTime
+				,endTime
+				,book_date
+				,book_title
+				,book_cont
+				,bgcolor
+			
+			)
+			values (
+				<!-- no : selectKey -->
+				#{no}
+				,#{loginID}
+				,#{roomlist}
+				,date_format(#{startTime},  '%Y-%m-%d %H:%i:%s')
+				,date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')	
+				,#{booking_cnt}
+				,#{booking_stime}
+				,#{booking_etime}
+				,#{booking_date}
+				,#{booking_title}
+				,#{booking_cont}
+				,#{booking_color}				
+		
+			)
+	</insert>
+	
+	<update id="bookUpdate">
+		update tb_study_booking 
+			set  book_title= #{booking_title}
+				,book_cont = #{booking_cont}
+				,bgcolor = #{booking_color}
+				,book_start = date_format(#{startTime},  '%Y-%m-%d %H:%i:%s')
+				,book_end = date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')
+				,book_per_cnt = #{booking_cnt}
+				,startTime = #{booking_stime}
+				,endTime = #{booking_etime}
+				,book_date = #{booking_date}
+				,sturm_no =#{roomlist}
+			
+		where book_no = #{book_no}	
+	</update>
+	
+	<delete id="bookDelete">
+		delete from tb_study_booking where book_no = #{book_no}
+		
+	</delete>
+	
+	
+</mapper>

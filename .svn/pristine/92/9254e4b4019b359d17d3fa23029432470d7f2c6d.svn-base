@@ -1,0 +1,8 @@
+package kr.happyjob.study.rsvapl.service;
+
+import org.springframework.stereotype.Service;
+
+@Service
+public class RsvaplServiceImpl implements RsvaplService{
+
+}

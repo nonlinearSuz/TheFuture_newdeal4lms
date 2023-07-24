@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.study.rsvapl.dao.RsvaplDao">
+<!-- 나의 예약현황 -->
+
+	<select id="myBookingList" resultType="kr.happyjob.study.rsvrem.model.ReservationModel">
+	
+	 
+  select 
+              	sb.book_no
+            ,sb.loginID 
+			,sb.sturm_no          
+            ,DATE_FORMAT(sb.book_start, '%Y-%m-%d  %H시') as book_start
+            ,DATE_FORMAT(sb.book_end, '%Y-%m-%d  %H시' ) as book_end
+            ,sb.book_per_cnt
+            ,sb.book_date
+            ,sb.book_title
+            ,sb.book_cont
+            ,sb.startTime
+            ,sb.endTime
+            ,sb.bgcolor
+            ,sr.rm_name
+            ,sr.rm_max
+            ,case when sb.book_start  <![CDATA[>]]>  now() then '진행예정' 
+	when  sb.book_end  <![CDATA[>=]]>  now() and now() <![CDATA[>=]]>  sb.book_start  then '진행중' 
+                when  sb.book_end <![CDATA[<]]>  now() then '진행완료'                   
+			end as book_cd
+            ,meeting.concatloginID
+            ,meeting.concatname
+            ,meeting.cnt
+            
+            
+            
+         from tb_study_booking sb
+				      left outer join ( 
+                  									  select   sm.sturm_no 
+                  						                 ,sm.book_no
+                  				                         ,group_concat(sm.loginID) as concatloginID   
+                                              ,group_concat(ui.name) as concatname   
+                  					             	     ,count(*) as cnt
+                  				                  from tb_studymeeting sm
+                                                         inner join tb_userinfo ui on ui.loginID = sm.loginID
+                  				                 group by book_no             
+                    ) meeting on meeting.book_no = sb.book_no
+                    		    inner join tb_userinfo ui on ui.loginID = sb.loginID
+				            inner join tb_studyroom sr on sr.sturm_no = sb.sturm_no
+                        where meeting.concatloginID like CONCAT('%', #{loginID}, '%')
+                order by sb.book_end desc
+		 LIMIT #{pageIndex}, #{pageSize} 
+         
+	</select>
+	
+
+	 	<select id="countMyBookingList" resultType ="int">
+		 
+	select count(*)
+	
+			 from tb_study_booking sb
+		   inner join tb_studyroom sr on sr.sturm_no = sb.sturm_no
+		left outer join (
+		select sm.sturm_no as smstuno
+				,sm.book_no as smbookno
+		        ,sm.loginID as smloginID
+		        ,sm.host_yn as smhostyn
+				,count.cnt
+		        ,count.host_yn
+		        ,count.loginID
+		 from tb_studymeeting sm
+			inner join ( select   sm.sturm_no 
+				,sm.book_no
+		        ,sm.loginID
+		        ,sm.host_yn
+				,count(*) as cnt
+		 from tb_studymeeting sm
+		 group by book_no) count on count.book_no = sm.book_no 
+		 
+		 ) meeting on meeting.smbookno = sb.book_no
+		 where smloginID =  #{loginID} 
+ 
+	</select>  
+	
+	
+	<delete id="deleteMyBooking">
+		delete from tb_study_booking where book_no = #{book_no}
+		
+	</delete>
+	
+	<delete id="deleteMeeting">
+		delete from tb_studymeeting where book_no = #{book_no}		
+	</delete>
+	
+</mapper>

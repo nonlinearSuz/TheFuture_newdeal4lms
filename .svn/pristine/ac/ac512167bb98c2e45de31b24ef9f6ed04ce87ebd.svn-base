@@ -1,0 +1,88 @@
+package kr.happyjob.study.suplct.dao;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+
+import kr.happyjob.study.common.comnUtils.FileUtilCho;
+import kr.happyjob.study.suplct.model.AttendeeStuModel;
+import kr.happyjob.study.suplct.model.LectureModel;
+import kr.happyjob.study.suplct.model.LectureModelStu;
+
+public interface SuplctDao {
+	
+	/**[관리자] 강의 목록 조회 *//*
+	public List<LectureModel> lecturelist(Map<String, Object> paramMap) throws Exception; 
+	
+	*//**[학생] 강의 목록 조회 *//*
+	public List<LectureModelStu> stulecturesearchlist(Map<String, Object> paramMap) throws Exception; 
+	
+	*//**[관리자] 강의  목록 카운트 조회 *//*
+	public int countlecturelist(Map<String, Object> paramMap) throws Exception ;
+	
+	
+	*//**[관리자] 강의  목록 카운트 조회 *//*
+	public int stucountlecturelist(Map<String, Object> paramMap) throws Exception ;
+	*/
+	
+	
+	
+	
+	/**[관리자]강의  단건 조회 - 강의 관리 */
+	public LectureModel lectureselectone(Map<String, Object> paramMap) throws Exception ;
+	
+	/**[관리자]강의  등록 */
+	public int lectureinsert(Map<String, Object> paramMap) throws Exception; 
+		
+	/**[관리자]강의 수정 */
+	public int lectureupdate(Map<String, Object> paramMap) throws Exception; 
+		
+	/**[관리자] 삭제 */
+	public int lecturedelete(Map<String, Object> paramMap) throws Exception ;
+
+	/**[관리자] 파일 입력*/
+	public int fileinsert(Map<String, Object> paramMap);
+
+	/**[관리자] 파일 삭제*/
+	public int deletefileinfo(Map<String, Object> paramMap);
+
+	
+	/**[관리자] 학생 목록 조회 */
+	public List<AttendeeStuModel> attendeesearchlist(Map<String, Object> paramMap)throws Exception;
+	/**[관리자] 학생 목록 카운트 조회 */
+	public int countattendeelist(Map<String, Object> paramMap) throws Exception;
+
+	
+	/*강사 강의 리스트 */
+	public List<LectureModel> proflecturelist(Map<String, Object> paramMap);
+
+	/*강사 목록 카운트 리스트 */
+	public int cntproflecturelist(Map<String, Object> paramMap);
+
+	/*학생 강의 리스트 */
+	public List<LectureModel> stulecturelist(Map<String, Object> paramMap);
+
+	/*학생 목록 카운트 리스트 */
+	public int cntstulecturelist(Map<String, Object> paramMap);
+
+	/*관리자 강의 리스트 */
+	public List<LectureModel> maslecturelist(Map<String, Object> paramMap);
+
+	/*관리자 목록 카운트 리스트 */
+	public int cntlecturelist(Map<String, Object> paramMap);
+
+	/*[공통] 바로 삭제  --- 실질적으로는 update임. lecDel_yn을 update해서 레코드 노출 안되도록 함. */
+	public int lecturedelete_dir(Map<String, Object> paramMap);
+	
+	public int checkSameTime(Map<String, Object> paramMap) throws Exception;
+	public int checkSameTimeUpdating(Map<String, Object> paramMap)throws Exception;
+	
+	public int checkSameTimetoEnroll(Map<String, Object> paramMap)throws Exception;
+	
+	
+	
+}

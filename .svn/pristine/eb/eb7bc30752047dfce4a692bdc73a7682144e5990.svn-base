@@ -1,0 +1,21 @@
+package kr.happyjob.study.cmmntc.model;
+
+import lombok.Data;
+
+@Data
+public class NoticeReply {
+	
+	//tb_userinfo
+	private String name;
+	private String loginID;
+	//tb_notice_reply
+	private int rpy_no;
+	private String rpy_contents;
+	private String enr_user;
+	private String enr_date;
+	private String upd_date;
+	private String upd_user;
+	//tb_notice
+	private int nt_no;
+	
+}

@@ -1,0 +1,597 @@
+package kr.happyjob.study.suplct.controller;
+
+import java.io.File;
+import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.happyjob.study.suplct.model.AttendeeStuModel;
+import kr.happyjob.study.suplct.model.LectureModel;
+import kr.happyjob.study.suplct.model.LectureModelStu;
+import kr.happyjob.study.suplct.service.SuplctService;
+
+@Controller
+@RequestMapping("/suplct/")
+public class SuplctController {
+   
+   @Autowired
+   SuplctService suplctService;
+   
+   // Set logger
+   private final Logger logger = LogManager.getLogger(this.getClass());
+
+   // Get class name for logger
+   private final String className = this.getClass().toString();
+   
+   
+   
+   /**
+    * 초기화면
+    */
+   @RequestMapping("lecture.do")
+   public String lecture(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+         HttpServletResponse response, HttpSession session) throws Exception {
+      
+      logger.info("+ Start " + className + ".lecture");
+      logger.info("   - paramMap : " + paramMap);
+      
+     
+      logger.info("+ End " + className + ".lecture");
+
+      return  "suplct/lectureList";
+   }
+  
+   /** 전체 lectureList.do */
+  @RequestMapping("lectureList.do")
+   public String lecturelist(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+         HttpServletResponse response, HttpSession session) throws Exception {
+      
+      logger.info("+ Start " + className + ".lecturelist");
+      logger.info("   - paramMap : " + paramMap);
+      logger.info("★★★★★★★★★현재 접속한 사람의 유저타입 : "+ session.getAttribute("userType")); // T: 강사 || S: 학생 || M :관리자
+    
+    
+     /** 공통 - 페이지 처리 */
+      int pagenum = Integer.parseInt((String) paramMap.get("pagenum"));
+      int pageSize = Integer.parseInt((String) paramMap.get("pageSize"));
+      int pageindex = (pagenum - 1) * pageSize;
+      
+      paramMap.put("pageSize", pageSize);
+      paramMap.put("pageindex", pageindex);
+      
+      
+     /**     리턴페이지  */
+     String returnpage="";
+     /**  유저타입 세션에서 가져와서 선언  */
+     String usertype = (String) session.getAttribute("userType");
+    
+      /**로그인 아이디 세션에서 가져와서 선언  */
+	 String loginID = (String) session.getAttribute("loginId");
+    
+    
+	 /** 유저타입 분기처리  */
+		if("T".equals(usertype)){ //강사일 경우 
+			paramMap.put("loginID",loginID);
+			List<LectureModel> proflecturesearchlist = suplctService.proflecturelist(paramMap);
+	    	int totalcnt = suplctService.cntproflecturelist(paramMap);
+	    	model.addAttribute("proflecturesearchlist", proflecturesearchlist);
+	        model.addAttribute("totalcnt", totalcnt); 
+	        logger.info("강사 컨트톨러 탐~~~~");
+			returnpage = "suplct/proflectureListgrd";
+	      
+		}else if("S".equals(usertype)){ // 학생일 경우
+	    	
+	    	  paramMap.put("loginID", loginID); 
+	    	  List<LectureModel> stulecturesearchlist = suplctService.stulecturelist(paramMap);
+	    	  int totalcnt = suplctService.cntstulecturelist(paramMap);
+	    	  model.addAttribute("stulecturesearchlist", stulecturesearchlist);
+	          model.addAttribute("totalcnt", totalcnt); 
+	    	  
+	          returnpage = "suplct/stutotallectureListgrd";
+	      
+	    }else { // "M" 관리자일경우
+	    	 
+	    	  paramMap.put("loginID", loginID);
+	    	  List<LectureModel> maslecturesearchlist = suplctService.maslecturelist(paramMap);
+	    	  int totalcnt = suplctService.cntlecturelist(paramMap);
+	    	  model.addAttribute("maslecturesearchlist", maslecturesearchlist);
+	          model.addAttribute("totalcnt", totalcnt);
+	          logger.info("관리자 컨트톨러 탐~~~~");
+	          
+	          returnpage = "suplct/mastotallectureListgrd"; 
+	    } 
+      
+	  logger.info("+ End " + returnpage + ".returnpage");
+     logger.info("+ End " + className + ".lecturelist");
+      
+      return returnpage;
+      
+   }
+
+  
+  /** 강의 등록 */
+  @RequestMapping("lectureSave.do")
+  @ResponseBody
+   public Map<String, Object> lectureAdd(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+      HttpServletResponse response, HttpSession session) throws Exception {
+  //
+	   logger.info("+ Start " + className + ".lectureAdd(withFile)");
+	   logger.info("   - paramMap : " + paramMap);
+	   logger.info("============paramMap lectureAdd=============" + paramMap);
+	   
+	   String action = (String) paramMap.get("action");
+	   
+	   paramMap.put("loginid", (String) session.getAttribute("loginId"));
+	/*   for(String yoil : checkyoil){
+		   logger.info("yoil-------??" + yoil);
+		   
+		   		   
+	   }
+	   logger.info("checkyoil이 어떤 형태로 넘어오는지...." + checkyoil); //[월, 화, 수, 목, 금]
+	*/   
+	   
+	   String insertYoil = (String) paramMap.get("checkyoils");
+	   logger.info("insertYoil = "+insertYoil);
+	   String lec_start_date = (String) paramMap.get("lec_start");
+	   String lec_end_date = (String) paramMap.get("lec_end");
+	   String stime =(String) paramMap.get("lec_stime");
+	   String etime = (String) paramMap.get("lec_etime");
+	   
+	   String final_start_time = lec_start_date+ " " + stime;
+	   String final_end_time = lec_end_date+ " " + etime;
+	   
+	   paramMap.put("lec_starttime", final_start_time);
+	   paramMap.put("lec_endtime", final_end_time);
+	   
+	   int returncval = 0;
+	   
+	   if("I".equals(action)) {
+	 	  returncval = suplctService.lectureinsert(paramMap,request);
+	   } else if("U".equals(action)) {
+	 	  returncval = suplctService.lectureupdate(paramMap,request);
+	   } else if("D".equals(action)) {
+	 	  returncval = suplctService.lecturedelete(paramMap);
+	 	  
+	   }      
+	   
+	   Map<String, Object> returnmap = new HashMap<String, Object>();
+	   
+	   returnmap.put("returncval", returncval);
+	   
+	   logger.info("+ End " + className + ".lectureAdd(withFile)");
+	
+	   return returnmap;
+  }    
+  
+  
+  /** 수강 학생정보 */ 
+  @RequestMapping("lectureAttendee.do")
+  	public String attendeelist(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+        HttpServletResponse response, HttpSession session) throws Exception {
+     
+     logger.info("+ Start " + className + ".attendeelist");
+     logger.info("   - paramMap : " + paramMap);
+     
+     int pagenum = Integer.parseInt((String) paramMap.get("stuPageNo"));
+     int pageSize = Integer.parseInt((String) paramMap.get("pageSize"));
+     int pageindex = (pagenum - 1) * pageSize;
+     
+     paramMap.put("pageSize", pageSize);
+     paramMap.put("pageindex", pageindex);
+     
+     // Controller  Service  Dao  SQL
+     List<AttendeeStuModel> attendeesearchlist = suplctService.attendeesearchlist(paramMap);
+     int totalcnt = suplctService.countattendeelist(paramMap);
+     
+     model.addAttribute("attendeesearchlist", attendeesearchlist);
+     model.addAttribute("totalcnt", totalcnt);
+     
+     
+     logger.info("+ End " + className + ".attendeelist");
+
+     return "suplct/attendeeListgrd";
+  }
+ 
+
+  	/**강의 하나 선택시*/
+   @RequestMapping("lectureSelectOne.do")
+   @ResponseBody
+   	public Map<String, Object> lectureselectone(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+         HttpServletResponse response, HttpSession session) throws Exception {
+      
+	   		logger.info("+ Start " + className + ".lectureSelectOne");
+	   		logger.info("   - paramMap : " + paramMap);
+	   		logger.info("lectureSelectOne paramMap================="+ paramMap);
+      
+      // Controller  Service  Dao  SQL
+      LectureModel lecturesearch = suplctService.lectureselectone(paramMap);
+      
+      Map<String, Object> returnmap = new HashMap<String, Object>();
+      
+      returnmap.put("lecturesearch", lecturesearch);
+      
+      logger.info("lecturesearch  ================="+ lecturesearch );
+      logger.info("+ End " + className + ".lectureSelectOne");
+
+      return returnmap;
+   } 
+
+   /* 강의 하나 삭제 */
+   @RequestMapping("delLec.do")
+	@ResponseBody
+	public Map<String, Object> del_lec(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+			HttpServletResponse response, HttpSession session) throws Exception {
+		
+		logger.info("+ Start " + className + ".delLec");
+		logger.info("   - paramMap : " + paramMap);
+		logger.info("=====================del Lec.do Controller 탔어요~~================================");
+
+	   paramMap.put("loginid", (String) session.getAttribute("loginId"));
+	
+	
+	      int returnvalue = 0;
+	
+	      returnvalue = suplctService.lecturedelete_dir(paramMap);      
+	
+	      Map<String, Object> returnmap = new HashMap<String, Object>();
+	
+	      returnmap.put("returnvalue", returnvalue);
+
+		
+		logger.info("+ End " + className + ".delLec");
+		
+		return returnmap;
+	}
+   
+   /**파일 다운로드 */
+   @RequestMapping("downloadLectureFile.do")
+	public void downloadBbsAtmtFil(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+			HttpServletResponse response, HttpSession session) throws Exception {
+	
+		logger.info("+ Start " + className + ".downloadBbsAtmtFil");
+		logger.info("   - paramMap : " + paramMap);
+		
+		// 첨부파일 조회
+		LectureModel lecturesearch = suplctService.lectureselectone(paramMap);  // file 이름    , 물리경로
+		
+		byte fileByte[] = FileUtils.readFileToByteArray(new File(lecturesearch.getFile_physic_path())); // 다운로드 하기 위해서 fileByte[]
+		
+		response.setContentType("application/octet-stream");// hearder에 넣는 값으로 
+	    response.setContentLength(fileByte.length);
+	    response.setHeader("Content-Disposition", "attachment; fileName=\"" + URLEncoder.encode(lecturesearch.getFile_name(),"UTF-8")+"\";");
+	    response.setHeader("Content-Transfer-Encoding", "binary");
+	    response.getOutputStream().write(fileByte);
+	     
+	    response.getOutputStream().flush();
+	    response.getOutputStream().close();
+
+		logger.info("+ End " + className + ".downloadBbsAtmtFil");
+	}
+    
+   @RequestMapping(value="sameTimeChecking.do", method=RequestMethod.POST)
+   @ResponseBody
+   public int check_sameTime(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+	         HttpServletResponse response, HttpSession session,  @RequestParam(value="checkyoil[]") List<String> checkyoil) throws Exception{
+	   
+	   logger.info("+ Start " + className + ".check_sameTime");
+	   logger.info("파라미터로 넘어온 모델은 무엇인지~~ " + paramMap);
+	   //booking_date=2023.06.28  booking_stime=12, booking_etime=16,
+	   //book_start  2023.06.28 + 12
+	   //book_end 2023.06.28 + 16
+	   
+	  /* 
+	   List<String> yoilList = (List<String>) paramMap.get("checkyoil[]");
+	   for(String yoil : yoilList){
+		   logger.info("yoil----??:" + yoil);
+	   }
+	   */
+	   for(String yoil : checkyoil){
+		   logger.info("yoil-------??" + yoil);
+		   
+		   		   
+	   }
+	   logger.info("checkyoil이 어떤 형태로 넘어오는지...." + checkyoil); //[월, 화, 수, 목, 금]
+	   paramMap.put("yoilArray", checkyoil);
+	   
+	   String stime = (String) paramMap.get("lec_stime");
+	   String etime = (String) paramMap. get("lec_etime");
+	   String startTime = stime + ":00:00";
+	   String endTime = etime + ":00:00";
+	  
+	   paramMap.put("startTime", startTime);
+	   paramMap.put("endTime", endTime);
+	   
+	   
+	   
+	   String date = (String) paramMap.get("booking_date"); 
+	   String s_date = (String) paramMap.get("lec_start");
+	   String e_date = (String) paramMap. get("lec_end");
+	
+	   String roomNo=(String) paramMap.get("room_no");
+	   paramMap.put("loginID",(String) session.getAttribute("loginId"));
+	   
+
+	   logger.info("다시 세팅해서 넘길파라미터는?? " + paramMap);
+	   
+	   
+	   String lec_no =(String) paramMap. get("lec_no");
+	   logger.info("lec_no가 존재하니???? " + lec_no); //수정하는경우...
+	   logger.info("??" + "".equals(lec_no));
+	   
+	
+	   //{room_no=1, lec_start=2023-07-04, lec_end=2023-07-28, lec_stime=10, lec_etime=15, checkyoil[]=월, 
+	   //yoilArray=[월, 화, 수], startTime=10:00:00, endTime=15:00:00, loginID=admin}
+	   //*************************** 검색쿼리 날리기.*************************************//
+	   int result = 0;
+	   
+	   
+	  
+	   
+	   
+	   
+	   ///////강의 자기가 수정할때///////
+	   //자기가 자신의 것을 수정하는 경우
+	   int myval = 0;
+	 // myval = rsvremService.countMyRsvOne(paramMap);
+	   logger.info("myval===="+ myval);
+	   //myval = 0 이면 원래대로 진행하고
+	   //myval = 1이면 자신의 것을 제외해야함.;.;;
+	   //select * from tb_study_booking where book_no not like 30;
+	   
+	   //s_date~e_date 비교 (e_date는 s_date보다 숫자가 커야한다. 날이 늦어야한다)
+	   
+
+	   
+	
+	 
+	  
+	   
+	   
+	   
+	   
+	   
+	   
+	
+	  
+	   
+	   String room_no = (String) paramMap. get("room_no");
+
+	   //TODO: 배열체크하기 checkyoil.length ==0
+	   
+	   if ("".equals(stime) || "".equals(etime)){
+		   result = -1;
+	   } else if(Integer.parseInt(stime) >= Integer.parseInt(etime)){
+		   result = -1;
+		   
+	   } else if("".equals(room_no)){
+		   result = -2;
+	   } else if(checkyoil.size() ==0){
+		   result = -3;
+	   } else if("".equals(s_date) || "".equals(e_date)){
+		   result = -4;
+		   
+	   }else {
+		   SimpleDateFormat sDate = new SimpleDateFormat("yyyy-MM-dd");
+		   logger.info("★★★★" + s_date); //★★★★2023-07-02 12:00:00
+		   
+		   Date startDate =sDate.parse(s_date); //Sun Jul 02 00:00:00 KST 2023
+		   Date endDate =sDate.parse(e_date); //Sun Jul 02 00:00:00 KST 2023
+
+		   logger.info("★★★★★★" + startDate);
+		   logger.info("★★★★★★" + endDate);
+		   logger.info("★★★★★★??????" + endDate.after(startDate));
+		   
+		  if(startDate.after(endDate)){
+		   result = -5;
+		   } 
+	  
+	   
+		  if("".equals(lec_no)){
+			   
+//			  if("".equals(lec_no)){
+			   
+			   result = suplctService.checkSameTime(paramMap);
+		   } 
+		   
+		   else {
+				 
+			   result =  suplctService.checkSameTimeUpdating(paramMap);
+			  
+		    }
+	   
+	   
+	   
+	   } 
+	   
+	   
+	 
+		   
+		
+	   
+	   
+	  
+	
+	   
+	   
+	   
+	   
+	   logger.info("+ End " + className + ".check_sameTime");  
+	   return result;
+	 }
+   
+   
+   
+   
+   @RequestMapping(value="enrollSameTimeChecking.do", method=RequestMethod.POST)
+   @ResponseBody
+   public int enroll_check_sameTime(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+	         HttpServletResponse response, HttpSession session) throws Exception{
+	   
+	   logger.info("+ Start " + className + ".enroll_check_sameTime");
+	   logger.info("파라미터로 넘어온 모델은 무엇인지~~ " + paramMap);
+
+	   paramMap.put("loginID",(String) session.getAttribute("loginId"));
+	   
+
+	   logger.info("다시 세팅해서 넘길파라미터는?? " + paramMap);
+	   
+	   
+	   String lec_no =(String) paramMap. get("lec_no");
+	   logger.info("lec_no가 존재하니???? " + lec_no); 
+	   logger.info("??" + "".equals(lec_no));
+	   
+	   LectureModel lecfind = suplctService.lectureselectone(paramMap);
+	   //{room_no=1, lec_start=2023-07-04, lec_end=2023-07-28, lec_stime=10, lec_etime=15, checkyoil[]=월, 
+	   //yoilArray=[월, 화, 수], startTime=10:00:00, endTime=15:00:00, loginID=admin}
+	   //*************************** 검색쿼리 날리기.*************************************//
+	   
+	   logger.info("lecfind====" + lecfind);
+	   //lec_starttime, lec_endtime -> 나중에timeformat
+	   //lec_start, lec_end,
+	   //yoil-->yoilArray     중복검색을 위해서 필요한것
+	   String yoils = lecfind.getYoil();
+	   logger.info("yoil배열로변환"+ yoils);
+	   String[] yoilArray = yoils.split(",");
+	   logger.info(Arrays.toString(yoilArray));
+	   List<String> yoilList = Arrays.asList(yoilArray);
+	   paramMap.put("yoilList", yoilList);
+	   paramMap.put("yoilArray", yoilArray); //지금이상하게넘어감 ...!
+	   String lec_start = lecfind.getLec_start();
+	   String lec_starttime = lecfind.getLec_starttime();
+	   String lec_end = lecfind.getLec_end();
+	   String lec_endtime = lecfind.getLec_endtime();
+	   paramMap.put("lec_start", lec_start);
+	   paramMap.put("lec_starttime", lec_starttime);
+	   paramMap.put("lec_end", lec_end);
+	   paramMap.put("lec_endtime", lec_endtime);
+	   
+	   int startTime = lecfind.getStartTime();
+	   int endTime = lecfind.getEndTime();
+	   String fin_startTime = startTime + ":00:00";
+	   String fin_endTime = endTime + ":00:00";
+	   paramMap.put("startTime", fin_startTime);
+	   paramMap.put("endTime", fin_endTime);
+	   logger.info("finish startTime ===" +fin_startTime);
+	   logger.info("다시세팅한 파라미터는 무엇인지~~~~ " + paramMap);
+	   
+	   int result = 0;
+	   
+	   //기준테이블에 중복쿼리검사해야함.
+	  //이미 수강신청되었는지도확인
+	   result = suplctService.checkSameTimetoEnroll(paramMap);
+	   
+	   
+	   ///////강의 자기가 수정할때///////
+	   //자기가 자신의 것을 수정하는 경우
+	   int myval = 0;
+	 // myval = rsvremService.countMyRsvOne(paramMap);
+	   logger.info("myval===="+ myval);
+	   //myval = 0 이면 원래대로 진행하고
+	   //myval = 1이면 자신의 것을 제외해야함.;.;;
+	   //select * from tb_study_booking where book_no not like 30;
+	   
+	   //s_date~e_date 비교 (e_date는 s_date보다 숫자가 커야한다. 날이 늦어야한다)
+	   
+
+	   
+	
+	 
+	  
+	   
+	   
+	   
+	   
+	   
+	   
+	
+	  
+	   
+	   String room_no = (String) paramMap. get("room_no");
+
+	   //TODO: 배열체크하기 checkyoil.length ==0
+//	   
+//	   if ("".equals(stime) || "".equals(etime)){
+//		   result = -1;
+//	   } else if(Integer.parseInt(stime) >= Integer.parseInt(etime)){
+//		   result = -1;
+//		   
+//	   } else if("".equals(room_no)){
+//		   result = -2;
+//	   } else if(checkyoil.size() ==0){
+//		   result = -3;
+//	   } else if("".equals(s_date) || "".equals(e_date)){
+//		   result = -4;
+//		   
+//	   }else {
+//		   SimpleDateFormat sDate = new SimpleDateFormat("yyyy-MM-dd");
+//		   logger.info("★★★★" + s_date); //★★★★2023-07-02 12:00:00
+//		   
+//		   Date startDate =sDate.parse(s_date); //Sun Jul 02 00:00:00 KST 2023
+//		   Date endDate =sDate.parse(e_date); //Sun Jul 02 00:00:00 KST 2023
+//
+//		   logger.info("★★★★★★" + startDate);
+//		   logger.info("★★★★★★" + endDate);
+//		   logger.info("★★★★★★??????" + endDate.after(startDate));
+//		   
+//		  if(startDate.after(endDate)){
+//		   result = -5;
+//		   } 
+//	  
+//	   
+//		  if("".equals(lec_no)){
+//			   
+////			  if("".equals(lec_no)){
+//			   
+//			   result = suplctService.checkSameTime(paramMap);
+//		   } 
+//		   
+//		   else {
+//				 
+//			   result =  suplctService.checkSameTimeUpdating(paramMap);
+//			  
+//		    }
+//	   
+//	   
+//	   
+//	   } 
+//	   
+//	   
+//	 
+//		   
+//		
+//	   
+//	   
+	  
+	
+	   
+	   
+	   
+	   
+	   logger.info("+ End " + className + ".enroll_check_sameTime");  
+	   return result;
+	 }
+   
+	   
+	   
+	   
+      
+}

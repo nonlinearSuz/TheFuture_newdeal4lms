@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.supsvy.dao.SupsvyDao">
+	
+<!-- 커밋용 임시주석  -->
+	 
+	<!-- [관리자] 강사 리스트  totProfList -->
+	<select id="totProfList" resultType="kr.happyjob.study.supsvy.model.SurveyModel">
+		select ui.loginID 
+      		  ,ui.name
+     		  ,ui.user_hp
+      		  ,ui.user_email
+      		  ,date_format(lc.lec_enr,'%Y.%m.%d') as lec_enr 
+      		  ,lc.lec_prof
+      		  ,lc.lec_no
+  		 from tb_userinfo ui
+  		 inner join  tb_lecture lc on ui.loginID = lc.lec_prof  
+  		 <where>
+  		 	ui.user_type ="T" and ui.lec_yn="Y" and lc.lecOpen_yn ="Y"
+  		 	group by lc.lec_prof
+ 			<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'prof_nm'.toString()">
+						and ui.name LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						and 
+						(   ui.name Like CONCAT('%', #{sname}, '%')
+				       or ui.loginID LIKE CONCAT('%', #{sname}, '%')
+				       )
+					</otherwise>
+				</choose>
+			</if>	
+  		 </where>
+  		 LIMIT #{pageindex}, #{pageSize}
+	</select>
+	
+
+	<!-- [관리자] 강사 리스트 카운트 cntProfList -->
+	<select id="cntProfList" resultType="int">
+		select count(distinct(lc.lec_prof))
+  		 from tb_userinfo ui
+  		 inner join  tb_lecture lc on ui.loginID = lc.lec_prof  
+  		 <where>
+  		 	 ui.user_type ="T" and ui.lec_yn="Y" and lc.lecOpen_yn ="Y"	
+			 <if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'prof_nm'.toString()">
+						and ui.name LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						and 
+						(   ui.name Like CONCAT('%', #{sname}, '%')
+				       or ui.loginID LIKE CONCAT('%', #{sname}, '%')
+				       )
+					</otherwise>
+				</choose>
+			</if>	
+  		 </where>
+	</select>
+	
+	<!-- [관리자] 설문조사 대상 전체 강의 리스트  : 강의 개설 승인 받은 강의 totLecList -->
+	<select id="totLecList" resultType="kr.happyjob.study.supsvy.model.SurveyModel">
+		<!--  select 
+  				lc.lec_no
+  				,ui.name
+  				,lc.lec_name
+			    ,lc.lec_prof
+			    ,ui.loginID prof_id
+			    ,date_format(lc.lec_start,'%Y.%m.%d') as lec_start
+			    ,date_format(lc.lec_end,'%Y.%m.%d') as lec_end
+			    ,ifnull(A.cnt,0) as lec_signcnt
+			    ,lc.max_no
+		from tb_lecture lc
+		inner join tb_userinfo ui ON ui.loginID = lc.lec_prof
+		left outer join (select lec_no, count(*) cnt from tb_request_list WHERE acc_yn NOT IN ('N' ,'C') group by lec_no) A on A.lec_no= lc.lec_no
+		where 
+		    ui.loginId = #{prof_id} and   강사 ID를 넘겨받아서 강사가 진행하는 과목을 끌어와야함. 
+		    lc.lecOpen_yn="Y"   -->
+
+		  select 
+  				lc.lec_no
+  				,ui.name
+  				,lc.lec_name
+			    ,lc.lec_prof
+			    ,ui.loginID prof_id
+			    ,date_format(lc.lec_start,'%Y.%m.%d') as lec_start
+			    ,date_format(lc.lec_end,'%Y.%m.%d') as lec_end
+			    ,ifnull(A.cnt,0) as lec_signcnt
+			    ,lc.max_no
+                ,svy.sv_no
+                ,ifnull(dstsvy.svycnt,0) as svySubmitcnt
+		from tb_lecture lc
+			inner join tb_userinfo ui ON ui.loginID = lc.lec_prof
+		 	left outer join (select lec_no, count(*) cnt from tb_request_list WHERE acc_yn NOT IN ('N' ,'C','P') group by lec_no) A on A.lec_no= lc.lec_no
+	        inner join  (select count(distinct(res.loginID)) svycnt,  res.lec_no  from tb_survey_res res  group by res.lec_no) dstsvy ON dstsvy.lec_no = lc.lec_no
+	        inner join tb_survey svy ON svy.sv_no = lc.sv_no
+         where 
+		    lc.lec_prof = #{prof_id}  and  lc.lecOpen_yn ="Y" and lc.lecDel_yn = "N"    
+	</select>
+	
+<!-- [관리자] 설문조사 대상 전체 강의 리스트 카운트 cntLecList -->
+   <select id="cntLecList" resultType="int">
+      select count(*)
+        from tb_lecture lc
+              inner join tb_userinfo ui on ui.loginID = lc.lec_prof  
+              left outer join (select lec_no, count(*) cnt from tb_request_list WHERE acc_yn NOT IN ('N' ,'C','P') group by lec_no) A on A.lec_no= lc.lec_no
+              inner join  (select count(distinct(res.loginID + res.sv_no + res.lec_no)) svycnt,  res.lec_no  from tb_survey_res res  group by res.lec_no) dstsvy ON dstsvy.lec_no = lc.lec_no
+               inner join tb_survey svy ON svy.sv_no = lc.sv_no
+      where 
+          ui.user_type ="T"  and ui.lec_yn="Y" and lc.lecOpen_yn ="Y"   and lc.lecDel_yn = "N"
+          and lc.lec_prof =#{prof_id}
+   </select>
+	
+	
+	<!-- [학생] 설문조사 대상 전체 강의 리스트  : 자신이 신청한 강의 stusurveyLecList -->
+	<select id="stusurveyLecList" resultType="kr.happyjob.study.supsvy.model.SurveyModel">
+	  select lc.lec_name
+	        ,lc.lec_prof
+	        ,ui.name
+	        ,ui.loginID
+	        ,rq.loginID
+	        ,ui.user_hp
+	        ,ui.user_email
+	        ,lc.lec_end
+	        ,lc.lec_no
+	    from tb_request_list rq
+	    inner join tb_lecture lc ON lc.lec_no = rq.lec_no
+	    left outer join tb_userinfo ui ON ui.loginID = lc.lec_prof 
+	    where rq.acc_yn="Y" and rq.loginID= #{loginID}
+	     LIMIT #{pageindex}, #{pageSize}
+	</select>
+	
+	
+	<!-- [학생] 설문조사 대상 전체 강의 리스트  카운트  cntStusurveyLecList -->
+	<select id="cntStusurveyLecList" resultType="int">
+			select count(*)
+		    from tb_request_list rq
+		    inner join tb_lecture lc ON lc.lec_no = rq.lec_no
+		    left outer join tb_userinfo ui ON ui.loginID = lc.lec_prof 
+		    where rq.acc_yn="Y" and rq.loginID= #{loginID}
+	</select>
+	
+	
+	<!-- [학생] 설문조사 대상 강의 상세 정보. -->
+	 <select id="lecDtInfo" resultType="kr.happyjob.study.supsvy.model.SurveyModel">
+		select  lc.lec_name
+		        ,lc.lec_prof
+		        ,ui.name
+		        ,ui.loginID
+		        ,rq.loginID
+		        ,lc.lec_start
+		        ,lc.lec_end
+		        ,rm.rm_name
+		        ,lc.lec_goal
+		        ,lec_contents
+		        ,lc.lec_no
+	    from   tb_request_list rq
+	    inner  join tb_lecture lc ON lc.lec_no = rq.lec_no
+	    inner  join tb_room rm ON rm.room_no = lc.room_no 
+	    left   outer join tb_userinfo ui ON ui.loginID = lc.lec_prof 
+	    where  rq.acc_yn="Y" and rq.loginID= #{loginID} and lc.lec_no=#{lec_no}
+	</select> 
+	
+	<!-- 20230630 -->
+	<!-- [설문조사] 강의에 배정된 설문 번호로 dt table에서 문제 번호와 문제 내용 가져와 리스트로 만듬.    -->
+	<select id="svyQList" resultType="kr.happyjob.study.supsvy.model.SurveyModel">
+	 SELECT
+			  sd.sv_no,
+			  sd.sv_qst_no,
+			  sd.qst_content,
+			  sd.qst_type		
+		FROM tb_survey_dt sd 
+       WHERE sd.sv_no = (   
+                       select sv_no
+                         from tb_lecture
+                        where lec_no = #{lec_no}
+                    )
+	</select>
+	<!-- [설문조사] 설문 번호와 설문문제 번호를 이용해 설문 예시와 내용을 가져온다.  -->
+	<select id="svyQsetExList" resultType="kr.happyjob.study.supsvy.model.SurveyModel">
+	   select sv_qst_no
+             ,sv_no
+             ,ex_num
+             ,ex_content
+	     from tb_survey_ex
+	    where sv_qst_no = #{sv_qst_no}
+	      and sv_no = #{sv_no}
+	</select>
+	
+	
+	
+	<!--[설문조사] 설문 제출  -->
+	<insert id="surveySubmit" parameterType="java.util.Map">
+  <selectKey resultType="int" keyProperty="no" order="BEFORE">
+    SELECT IFNULL(MAX(res_no), 0) + 1 FROM tb_survey_res
+  </selectKey>
+  INSERT INTO tb_survey_res (
+						    res_no,
+						    sv_qst_no,
+						    sv_no,
+						    loginID,
+						    res_short,
+						    res_long,
+						    res_regdate
+						  ) VALUES (
+									    #{no},
+									    #{sv_qst_no},
+									    #{sv_no},
+									    #{loginID},
+									    <if test="qst_one == 'qst_one'">
+									      #{ansval},
+									      NULL,
+									    </if>
+									    <if test="qst_multi =='qst_multi'">
+									      NULL,
+									      #{ansval},
+									    </if> 
+									    NOW()
+						  )
+</insert>
+	
+	
+	
+	
+	<!-- [관리자] 설문조사 차트 데이터 조회  -->
+   <select id="surveyChartModel" resultType="kr.happyjob.study.supsvy.model.SurveyModel">
+     SELECT svy.sv_qst_no
+               , lc.lec_name
+               , ui.name
+               , lc.lec_start
+               , lc.lec_end
+               , dt.qst_content
+               , COUNT(CASE WHEN svy.res_short = 1 THEN 1 END) AS count1
+               , COUNT(CASE WHEN svy.res_short = 2 THEN 1 END) AS count2
+               , COUNT(CASE WHEN svy.res_short = 3 THEN 1 END) AS count3
+               , COUNT(CASE WHEN svy.res_short = 4 THEN 1 END) AS count4
+               , COUNT(CASE WHEN svy.res_short = 5 THEN 1 END) AS count5
+               , ifnull(dstsvy.svycnt,0) as svySubmitcnt
+              
+    FROM tb_survey_res svy
+    LEFT OUTER JOIN tb_lecture lc ON lc.lec_no = svy.lec_no
+    LEFT OUTER JOIN tb_userinfo ui ON ui.loginID = lc.lec_prof
+    LEFT OUTER JOIN tb_survey_dt dt ON dt.sv_qst_no = svy.sv_qst_no
+     inner join  (select count(distinct(res.loginID)) svycnt,  res.lec_no  from tb_survey_res res  group by res.lec_no) dstsvy ON dstsvy.lec_no = lc.lec_no
+    
+   WHERE lc.lec_no = #{lecNo}
+   GROUP BY svy.sv_qst_no, lc.lec_name, lc.lec_prof, lc.lec_start, lc.lec_end, ui.name
+   </select>
+   
+	
+</mapper>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<form id="myForm" action=""  method="">
+    <input type="hidden" id="action"  name="action"  value=""/>
+    <input type="hidden" id="pageno"  name="pageno"  />
+    
+    <input type="hidden" id="currentPageComnGrpCod" value="1" />
+    <input type="hidden" id="currentPageComnDtlCod"  value="1"  />
+    
+    <input type="hidden" id="tmpAcnt_sbject_cd" value="">
+    <input type="hidden" id="tmpAcnt_sbject_name" value="">
+    
+     <input type="hidden" name="chkLCd" id="chkLCd" value="2"/>
+     <input type="hidden" name="chkLNm" id="chkLNm" value="2"/>
+    
+    <!-- 모달 배경 -->
+    <div id="mask"></div>
+
+    <div id="wrap_area">
+
+        <h2 class="hidden">header 영역</h2>
+        <jsp:include page="/WEB-INF/view/common/header.jsp"></jsp:include>
+
+        <h2 class="hidden">컨텐츠 영역</h2>
+        <div id="container">
+            <ul>
+                <li class="lnb">
+                    <!-- lnb 영역 --> <jsp:include
+                        page="/WEB-INF/view/common/lnbMenu.jsp"></jsp:include> <!--// lnb 영역 -->
+                </li>
+                <li class="contents">
+                    <!-- contents -->
+                    <h3 class="hidden">contents 영역</h3> <!-- content -->
+                    <div class="content">
+
+                        <p class="Location">
+                            <a href="../dashboard/dashboard.do" class="btn_set home">메인으로</a> <span
+                                class="btn_nav bold">회계</span> <span class="btn_nav bold">계정과목 관리
+                                </span> <a href="../accAcm/accManagement.do" class="btn_set refresh">새로고침</a>
+                        </p>
+                        
+                        
+                        
+                        
+                        <p class="conTitle">
+                            <span>계정과목 관리</span> <span class="fr"> 
+                            
+
+                            <span style=" color: black; display: inline-block; border: 3px solid #c0c0c0; padding: 7px 40px 7px 40px; font-weight: bold; font-size: 15px; background: #c0c0c0; border-radius: 2px;"><a href="" id="btnSearch" name="btn"><a href="javascript:fn_openpopup();" name="modal"">등&nbsp;록</span></a></div>
+                            </span>
+                        </p>
+                        
+                        <div style="height: 50px;">
+                            <label for="acnt_sbjct_inout" style=" font-size: 15px; font-weight: bold; margin-right: 10px;">구분</label>
+                            <select id="acnt_sbjct_inout" name="acnt_sbjct_inout" style="width: 150px;">
+                                    <option value="" >전체</option>
+                                    <option value="1" >수입</option>
+                                    <option value="2" >비용</option>
+                            </select> 
+                            
+                            <div style="display: inline-block; border: 3px solid #c0c0c0; padding: 7px 40px 7px 40px; font-weight: bold; font-size: 15px; background: #c0c0c0; border-radius: 2px;"><a href="" id="btnSearch" name="btn"><span style=" color: black;">검&nbsp;색</span></a></div>
+                        </div>  
+                            
+                        <div class="noticeList">
+                            <table class="col">
+                                <caption>caption</caption>
+                                <colgroup>
+                                    <col width="20%">
+                                    <col width="40%">
+                                    <col width="40%">
+                                </colgroup>
+    
+                                <thead>
+                                    <tr>
+                                        <th scope="col">구분</th>
+                                        <th scope="col">계정 대분류코드</th>
+                                        <th scope="col">계정 대분류명</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listnaccAcm"></tbody>
+                            </table>
+                        </div>
+    
+                        <div class="paging_area"  id="accAcmPagination"> </div>
+                        
+                        <p class="conTitle mt50">
+                            <span>계정 상세 코드</span> <span class="fr"> 
+                            <a class="btnType blue"  href="javascript:fn_accDtlPop();" name="modal"><span>신규등록</span></a>
+                            </span>
+                        </p>
+    
+                        <div class="divComDtlCodList">
+                            <table class="col">
+                                <caption>caption</caption>
+                                <colgroup>
+                                    <col width="15%">
+                                    <col width="20%">
+                                    <col width="20%">
+                                    <col width="25%">
+                                    <col width="20%">
+                                </colgroup>
+    
+                                <thead>
+                                    <tr>
+                                        <th scope="col">구분</th>
+                                        <th scope="col">계정 대분류명</th>
+                                        <th scope="col">계정 상세코드</th>
+                                        <th scope="col">계정 상세명</th>
+                                        <th scope="col">비고</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="accAcmDResultList">
+                                    <tr>
+                                        <td colspan="12">그룹코드를 선택해 주세요.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div class="paging_area"  id="accSLPagination"> </div>
+    
+                    </div> <!--// content -->
+
+                    <h3 class="hidden">풋터 영역</h3>
+                        <jsp:include page="/WEB-INF/view/common/footer.jsp"></jsp:include>
+                </li>
+            </ul>
+        </div><!-- containeron -->
+    </div> <!-- wrap_area -->
+</body>
+</html>

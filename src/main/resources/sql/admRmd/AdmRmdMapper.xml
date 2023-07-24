@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.admRmd.dao.AdmRmdDao">
+
+	<!-- 그룹코드 목록 조회 -->
+    <select id="roomlist" resultType="kr.happyjob.study.admRmd.model.RoomModel">
+		/*kr.happyjob.study.admRmd.dao.AdmRmdDao.roomlist*/
+        select rm.room_no
+              ,rm.rm_max
+              ,rm.rm_size
+              ,rm.rm_name
+              ,rm.enr_user
+              ,DATE_FORMAT(rm.enr_date, '%Y.%m.%d.') as enr_date
+              ,rm.upd_user
+              ,DATE_FORMAT(rm.upd_date, '%Y.%m.%d.') as upd_date
+              ,rm.rm_yn
+              ,ui.loginID
+            
+          from tb_room rm
+          	left join tb_userinfo ui on ui.loginID = rm.enr_user
+          
+		<where>
+		<!-- 해당 내용으로 검색 기능을 제공한다/만약 검색하지 않을 시 전부 return -->
+		<if test="(rm_yn != null) and (!rm_yn.equals(''))"> <!-- null 체크 -->
+		    and rm.rm_yn = #{rm_yn}
+		</if>
+			<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'capacity'.toString()">
+						and rm.rm_max  <![CDATA[>=]]> CAST(#{sname} AS UNSIGNED)  <!-- string to int -->
+					</when>
+					<when test="searchKey eq 'name'.toString()">
+						and rm.rm_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						and (  rm.rm_max  <![CDATA[>=]]> CAST(#{sname} AS UNSIGNED)  <!-- string to int -->
+							or rm.rm_name Like CONCAT('%', #{sname}, '%')
+							)
+					</otherwise>
+				</choose>
+				
+			</if> 
+		</where>
+		ORDER BY rm.room_no ASC
+		LIMIT #{pageindex}, #{pageSize}
+
+	</select>
+
+	<!-- 목록 총 갯수 조회 -->
+	<select id="roomcountlist" resultType="int">
+		/*kr.happyjob.study.admRmd.dao.AdmRmdDao.roomcountlist*/
+		select count(*)
+          from tb_room rm
+		<where>
+		<if test="(rm_yn != null) and (!rm_yn.equals(''))"> <!-- null 체크 -->
+		    and rm.rm_yn = #{rm_yn}
+		</if>
+		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'capacity'.toString()">
+						and rm.rm_max  <![CDATA[>=]]> CAST(#{sname} AS UNSIGNED)  <!-- string to int -->
+					</when>
+					<when test="searchKey eq 'name'.toString()">
+						and rm.rm_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						and (  rm.rm_max  <![CDATA[>=]]> CAST(#{sname} AS UNSIGNED)  <!-- string to int -->
+							or rm.rm_name Like CONCAT('%', #{sname}, '%')
+							)
+					</otherwise>
+				</choose>
+				
+			</if> 
+		</where>
+	</select>
+	
+	
+	<!-- 한건 조회 -->
+	<select id="selectoneroom" resultType="kr.happyjob.study.admRmd.model.RoomModel">
+    /*kr.happyjob.study.admRmd.dao.AdmRmdDao.roomlist*/
+       select rm.room_no 
+             ,rm.rm_max
+             ,rm.rm_size
+             ,rm.rm_name
+             ,rm.enr_user
+             ,rm.enr_date
+             ,rm.upd_user
+             ,rm.upd_date
+             ,rm.rm_yn
+             ,ui.loginID
+ 
+         from tb_room rm
+         	left join tb_userinfo ui on ui.loginID = rm.enr_user
+        where rm.room_no =  #{room_no}
+	</select>
+	
+	<!-- 장비 목록 조회 -->
+	 <select id="itemlist" resultType="kr.happyjob.study.admRmd.model.RoomModel">
+		/*kr.happyjob.study.admRmd.dao.AdmRmdDao.itemlist*/
+        select tm.room_no
+        	  ,tm.item_no
+        	  ,tm.item_nm
+        	  ,tm.item_vol
+        	  ,tm.item_etc           
+          from tb_item tm    
+		<where>
+			tm.room_no = #{room_no}
+		</where>
+		ORDER BY tm.item_no ASC
+		LIMIT #{pageindex}, #{pageSize}
+	</select>
+	
+	<!-- 장비 목록 총 갯수 조회 -->
+	<select id="itemcountlist" resultType="int">
+		/*kr.happyjob.study.admRmd.dao.AdmRmdDao.roomcountlist*/
+		select count(*)
+          from tb_item tm
+		<where>
+			tm.room_no = #{room_no}
+		</where>
+	</select>
+	
+	<select id="max_num" resultType="int">
+		select max(room_no) 
+		  from tb_room
+	</select>
+	
+	
+	<insert id="insertroom">
+	    <selectKey resultType="int" keyProperty="no" order="BEFORE">
+            select ifnull(max(room_no),0) + 1 from tb_room
+        </selectKey>
+        	insert into tb_room (room_no
+				             	,rm_max
+				              	,rm_size
+				              	,rm_name
+				              	,enr_user
+				              	,enr_date
+				              	,rm_yn
+					             )
+					    values (
+					            #{no}
+								,#{rm_max}
+								,#{rm_size}
+								,#{rm_name}
+								,#{enr_user1}
+								,now()
+								,#{rm_avail}
+					               
+					    )
+	</insert>
+	
+ 	<update id="updateroom">
+	    update tb_room
+	         set rm_max =   #{rm_max}
+                , rm_size =  #{rm_size}
+                , rm_name =  #{rm_name}
+                , upd_user = #{enr_user1}
+                , upd_date = now()
+                , rm_yn =  #{rm_avail}
+          where room_no = #{room_no}
+	</update> 
+	
+	
+	<delete id="deleteroom">
+	    delete from tb_room
+	    where  room_no =  #{room_no}
+	</delete>
+	
+	
+	
+	
+	<!-- =================================optional 예약 및 예약 시간===================== -->
+	<select id="usability" resultType="kr.happyjob.study.admRmd.model.RoomModel">
+	       /*kr.happyjob.study.admRmd.dao.AdmRmdDao.roomlist*/
+        select lc.lec_no
+        	  ,lc.lec_name
+        	  ,lc.lec_prof
+        	  ,lc.starttime
+        	  ,lc.endtime
+        	  ,lc.lec_start
+        	  ,lc.lec_end
+        	  ,lc.lecDel_yn
+        	  ,lc.lecOpen_yn
+        	  ,rm.room_no
+              
+  
+          from tb_room rm
+          	right join tb_lecture lc on lc.room_no = rm.room_no
+         where rm.room_no =  #{room_no}
+	</select>
+	
+	
+
+
+</mapper>   

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.exmrex.dao.ExmRexDao">
+
+	<!-- 시험 목록 조회 -->
+	<select id="gradelist" resultType="kr.happyjob.study.exmrex.model.GradeModel">
+		<!-- kr.happyjob.study.exmRex.dao.ExmRexDao.gradelist -->
+		<choose>
+			<when test="value == 'admin'">
+				SELECT le.test_start
+							, le.test_end
+							, le.test_no
+        					, te.test_name
+        					, le.lec_no
+        					, le.lec_name
+				 FROM tb_lecture le
+      			 INNER JOIN tb_tests te ON le.test_no = te.test_no
+				<where>
+					<if test="lec_no != null">
+						AND le.lec_no = #{lec_no}
+					</if>
+				</where>
+				GROUP BY le.lec_no
+				LIMIT #{pageindex}, #{pageSize}
+			</when>
+			<otherwise>
+				SELECT le.test_start
+							, le.test_end
+							, le.test_no
+							, te.test_name
+							, le.lec_no
+							, le.lec_name
+			      FROM tb_lecture le
+		INNER JOIN tb_tests te ON le.test_no = te.test_no
+				<where>
+					AND le.lec_prof = #{value}
+					<if test="lec_no != null">
+						AND le.lec_no = #{lec_no}
+					</if>
+				</where>
+					GROUP BY le.lec_no
+					LIMIT #{pageindex}, #{pageSize}
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 시험 목록 총 갯수 조회 -->
+	<select id="countgradelist" resultType="int">
+		<!-- kr.happyjob.study.exmRex.dao.ExmRexDao.countgradelist -->
+		SELECT COUNT(le.test_no)
+		 FROM tb_lecture le
+		INNER JOIN tb_tests te ON le.test_no = te.test_no
+		<where>
+			<!-- and le.lec_prof = #{value} -->
+			<if test="lec_no != null">
+				AND le.lec_no = #{lec_no}
+			</if>
+		</where>
+	</select>
+
+	<!-- 검색용 강의 목록 -->
+	<select id="getLectureList" resultType="kr.happyjob.study.exmrex.model.GradeModel">
+		SELECT lec_no
+					, lec_name
+		 FROM tb_lecture
+		<where>
+			<if test="loginID != 'admin'">
+				AND lec_prof = #{loginID}
+			</if>
+		</where>
+	</select>
+
+	<!-- 시험 응시 상황 -->
+	<select id="gradestdlist" resultType="kr.happyjob.study.exmrex.model.GradeModel">
+		<!-- kr.happyjob.study.exmRex.dao.ExmRexDao.gradestdlist -->
+		SELECT td.lec_no
+					, td.user_id
+					, tu.name
+					, SUM(td.get_score) AS tot_score
+					, CASE 
+								WHEN td.res_regdate IS NOT NULL THEN td.res_regdate 
+									ELSE '미응시' 
+									END   				AS reg_status
+					, td.res_regdate 				AS reg_date
+					, trl.drop_yn
+		FROM tb_test_dt td
+  LEFT JOIN tb_userinfo tu ON td.user_id = tu.loginID
+  LEFT JOIN tb_request_list trl ON trl.lec_no = td.lec_no AND trl.loginID = td.user_id
+	  WHERE td.lec_no = #{lec_no}
+	  GROUP BY td.lec_no, td.user_id, tu.name, td.res_regdate
+	</select>
+
+	<select id="gradeselectonelec" resultType="kr.happyjob.study.exmrex.model.GradeModel">
+		SELECT trl.lec_no
+					, trl.loginID
+					, ui.name
+					, SUM(td.get_score) AS tot_score
+					, CASE 
+								WHEN td.res_regdate IS NOT NULL THEN td.res_regdate 
+									ELSE '미응시' 
+									END   				AS reg_status
+					, td.res_regdate 				AS reg_date
+					, trl.drop_yn
+		FROM tb_request_list trl
+		INNER JOIN tb_userinfo ui ON ui.loginID = trl.loginID
+		    LEFT JOIN tb_test_dt td ON td.user_id = trl.loginID AND td.lec_no = trl.lec_no
+  			LEFT JOIN tb_request_list trl ON trl.lec_no = td.lec_no AND trl.loginID = td.user_id
+	   WHERE trl.lec_no = #{lec_no}
+		    AND trl.acc_yn = 'Y'
+		GROUP BY trl.lec_no
+						  , trl.loginID
+						  , ui.name
+		ORDER BY ui.name
+	</select>
+
+
+
+</mapper>

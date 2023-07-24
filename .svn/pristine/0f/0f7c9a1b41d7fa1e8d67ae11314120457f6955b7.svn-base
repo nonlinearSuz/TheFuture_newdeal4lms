@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.supAth.dao.SupAthDao">
+
+	<!--  목록 조회 -->
+	<select id="approvalist" resultType="kr.happyjob.study.supAth.model.ApproveModel">
+        select  lc.lec_no
+		        ,lc.lec_name
+		        ,lc.lec_prof
+		        ,lc.lecDel_yn
+		        ,lc.lecOpen_yn
+		        
+		        
+		        ,CONCAT(DATE_FORMAT(lc.lec_start, '%Y.%m.%d.'), ' - ', DATE_FORMAT(lc.lec_end, '%Y.%m.%d.')) as lec_period
+		        
+		        ,ui.loginID
+		        ,ui.name
+		        
+		        ,B.stud_id
+		        ,B.drop_yn
+		        ,case when B.acc_yn = 'P' then '승인대기'
+		              when B.acc_yn = 'Y' then '승인'
+		              when B.acc_yn = 'C' then '수강 취소'
+		              else '반려'
+		         end as acc_yn
+		        ,B.stud_name
+		        ,B.acc_yn as acc_yn_code
+		          from tb_lecture lc
+		     left join tb_userinfo ui on ui.loginID = lc.lec_prof
+		          join (select rl.lec_no
+		                      ,rl.loginID as stud_id
+		                      ,rl.drop_yn
+		                      ,rl.acc_yn
+		                      ,us.name as stud_name
+		                  from tb_request_list rl
+		            inner join tb_userinfo us on us.loginID = rl.loginID) B on B.lec_no = lc.lec_no
+		          
+        
+		<where>
+			lc.lecDel_yn = "N" and lc.lecOpen_yn ="Y"
+		<if test="(loginid != null) and (!loginid.equals(''))">
+		    and lc.lec_prof = #{loginid}
+		</if>
+		
+		<if test="value eq 'approval'.toString()">
+			and B.acc_yn = 'Y'
+		</if>
+		<if test="value eq 'pending'.toString()">
+			and B.acc_yn = 'P'
+		</if>
+		<if test="value eq 'disapproval'.toString()">
+			and B.acc_yn = 'N'
+		</if>
+		<if test="value eq 'total'.toString()">
+			and (B.acc_yn != '' and B.acc_yn != '')
+		</if>
+		<if test="(searchKey != null) and (!searchKey.equals(''))">
+			and lc.lec_no = #{searchKey}
+		</if>	
+		</where>
+		ORDER BY lc.lec_start DESC, B.stud_name ASC
+		LIMIT #{pageindex}, #{pageSize}
+
+	</select>
+
+	<!-- 목록 총 갯수 조회 -->
+	<select id="countapprovalist" resultType="int">
+		select count(*)
+          from tb_request_list rq
+               left join tb_userinfo ui on ui.loginID = rq.loginID
+               left join tb_lecture lc on lc.lec_no = rq.lec_no
+               
+
+		<where>
+			lc.lecDel_yn = "N" and lc.lecOpen_yn ="Y"
+		 <if test="(loginid != null) and (!loginid.equals(''))">
+		    and lc.lec_prof = #{loginid}
+		</if>
+		
+		<if test="value eq 'approval'.toString()">
+			and rq.acc_yn = 'Y'
+		</if>
+		<if test="value eq 'pending'.toString()">
+			and rq.acc_yn = 'P'
+		</if>
+		<if test="value eq 'disapproval'.toString()">
+			and rq.acc_yn = 'N'
+		</if>
+		<if test="value eq 'total'.toString()">
+			and (rq.acc_yn != '' and rq.acc_yn != '')
+		</if>
+		<if test="(searchKey != null) and (!searchKey.equals(''))">
+			and lc.lec_no = #{searchKey}
+		</if>	
+		</where> 
+	</select>
+	
+	
+	<!-- 검색용 강의 목록  -->
+	<select id="leclist" resultType="kr.happyjob.study.supAth.model.ApproveModel">
+		select lec_name
+			  ,lec_no
+		from tb_lecture
+		where lec_prof = (select loginID from tb_userinfo where loginID = #{loginid})
+		  and lecDel_yn = "N"
+          and lecOpen_yn = "Y"
+	</select>
+	
+	<!-- 승인 및 반려 -->
+	<update id="approvelecture">
+	    update tb_request_list rq
+	       set rq.acc_yn =  #{acc_yn}
+	     where rq.lec_no =  #{lec_no} 
+	       and rq.loginID = #{stud_id}
+	</update>
+	
+
+</mapper>

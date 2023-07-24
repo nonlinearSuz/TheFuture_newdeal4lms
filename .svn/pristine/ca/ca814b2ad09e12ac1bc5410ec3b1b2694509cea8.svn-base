@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.admhrd.dao.AdmHrdDao">
+
+	<!--  강사 목록 조회 -->
+	<select id="teacherlist" resultType="kr.happyjob.study.admhrd.model.TeacherModel">
+		<!-- kr.happyjob.study.admHrd.dao.AdmHrdDao.teacherlist -->
+		SELECT ui.loginID
+					, ui.name 
+		    		, ui.user_hp
+ 		  			, ui.lec_yn
+ 		  			, ui.user_date
+ 		   			, ui.user_type
+  		FROM tb_userinfo  ui
+		<where>
+			AND ui.user_active = "Y"
+			AND  ui.user_type = "T"
+			<if test="value eq 'approval'.toString()">
+				AND ui.lec_yn = 'Y'
+			</if>
+			<if test="value eq 'unapproval'.toString()">
+				AND  ui.lec_yn != 'Y'
+			</if>
+			<if test="(startDate != null) and (!startDate.equals('')) and (endDate != null) and (!endDate.equals(''))">
+				AND user_date between #{startDate} and #{endDate}
+			</if>
+			<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'name'.toString()">
+							AND ui.name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<when
+						test="searchKey eq 'loginID'.toString()">
+							AND ui.loginID LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						 AND (   ui.name LIKE CONCAT('%', #{sname}, '%')
+						       OR ui.loginID LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>		
+		</where>		
+		ORDER BY ui.name
+		LIMIT #{pageindex}, #{pageSize}
+	</select>
+	
+
+	<!-- 강사 목록 총 갯수 조회 -->
+	<select id="countteacherlist" resultType="int">
+		<!-- kr.happyjob.study.admHrd.dao.AdmHrdDao.countteacherlist -->
+		SELECT COUNT(*)
+		 FROM tb_userinfo ui
+		<where>
+			AND ui.user_active = "Y"
+			AND  ui.user_type = "T"
+			<if test="value eq 'approval'.toString()">
+				AND ui.lec_yn = 'Y'
+			</if>
+			<if test="value eq 'unapproval'.toString()">
+				AND  ui.lec_yn != 'Y'
+			</if>
+			<if test="(startDate != null) and (!startDate.equals('')) and (endDate != null) and (!endDate.equals(''))">
+				AND user_date between #{startDate} and #{endDate}
+			</if>
+			<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'name'.toString()">
+						AND ui.name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<when test="searchKey eq 'loginID'.toString()">
+						AND ui.loginID LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						 AND (   ui.name LIKE CONCAT('%', #{sname}, '%')
+						       or ui.loginID LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>		
+		</where>		
+	</select>
+
+	<!--  한 건 조회 -->
+	<select id="teacherselectone" resultType="kr.happyjob.study.admhrd.model.TeacherModel">
+		SELECT ui.loginID 
+					, ui.name
+					, ui.user_birth
+        		    , ui.user_hp
+        		    , ui.user_gender
+        		    , ui.user_email
+        		    , ui.user_addr
+        		    , ui.user_etc
+         FROM tb_userinfo  ui
+       WHERE ui.loginID=  #{loginID}  
+	</select>
+	
+	<select id="teacherselectonelec" resultType="kr.happyjob.study.admhrd.model.TeacherModel">
+		SELECT le.lec_no
+					, le.lec_name
+        		    , le.lec_start
+        		    , le.lec_end
+        		    , le.lec_prof
+          FROM tb_lecture le 
+        WHERE  le.lec_prof=  #{loginID}  
+	</select>
+	
+	<!-- 회원정보(비고) 수정 -->
+	<update id="userEtc">
+		UPDATE tb_userinfo
+				SET user_etc = #{userEtc}
+		 WHERE loginID = #{loginID}  
+	</update>
+	
+	<!-- 승인여부 -->
+	<update id="approval">
+		UPDATE tb_userinfo
+				SET lec_yn = CASE WHEN lec_yn = 'Y' THEN 'N' ELSE 'Y' END
+		 WHERE loginID = #{loginID}
+	</update>
+	
+	<!-- 회원탈퇴 -->
+	<update id="teacherWithdrawal">
+		UPDATE	tb_userinfo
+				SET	user_active =  'N' 
+		 WHERE	loginID =  #{loginID}  
+	</update>
+	
+</mapper>

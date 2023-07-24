@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.login.dao.LoginDao">
+
+   <!-- 사용자 로그인 체크 -->
+   <select id="checkLogin" resultType="String">
+      /*kr.happy.study.login.dao.LoginDao.checkLogin*/
+            SELECT  user_Type
+              FROM    tb_userinfo
+            WHERE   loginID = #{lgn_Id}
+               AND  password = #{pwd}
+     </select>
+
+
+   <!-- 사용자 로그인 -->
+   <select id="selectLogin" resultType="kr.happyjob.study.login.model.LgnInfoModel">
+      /*kr.happy.study.login.dao.LoginDao.selectLogin*/
+      SELECT  loginID as lgn_id
+               , name as usr_nm
+               , user_Type as mem_author
+               , ifnull(lec_yn,'N') as lec_yn
+               , ifnull(user_active,'N') as user_active
+     	 FROM tb_userinfo        
+        <where>
+        	loginID = #{lgn_Id}
+        	and password = #{pwd}
+		</where>
+     </select>
+
+
+	<!-- 사용자 메뉴 권한 -->
+   <select id="listUsrMnuAtrt" resultType="kr.happyjob.study.login.model.UsrMnuAtrtModel">
+         /*kr.happy.study.login.dao.LoginDao.listUsrMnuAtrt*/
+            SELECT  ta.mnu_id
+                  ,   ta.hir_mnu_id
+                  ,   ta.mnu_nm
+                  ,   ta.mnu_url
+                  ,   ta.mnu_dvs_cod
+                  ,   ta.grp_num
+                  ,   ta.odr
+                  ,   ta.lvl
+                  ,   ta.mnu_ico_cod
+<!--                   ,   ta.use_poa
+                  ,   ta.dlt_poa -->
+               FROM  tm_mnu_mst ta
+               WHERE EXISTS (
+                             SELECT  1
+                             FROM  tn_usr_mnu_atrt tb
+                             WHERE ta.mnu_id = tb.mnu_id
+                                  AND tb.user_type = #{userType}
+                           )
+                  AND ta.lvl=0
+               ORDER BY ta.odr
+     </select>
+
+     <!-- 사용자 자식 메뉴 권한 -->
+   <select id="listUsrChildMnuAtrt" resultType="kr.happyjob.study.login.model.UsrMnuChildAtrtModel">
+      /*kr.happy.study.login.dao.LoginDao.listUsrChildMnuAtrt*/
+         SELECT  ta.mnu_id
+               ,   ta.hir_mnu_id
+               ,   ta.mnu_nm
+               ,   ta.mnu_url
+               ,   ta.mnu_dvs_cod
+               ,   ta.grp_num
+               ,   ta.odr
+               ,   ta.lvl
+               ,   ta.use_poa
+               ,   ta.dlt_poa
+         FROM  tm_mnu_mst ta
+         WHERE EXISTS (
+                          SELECT  1
+                            FROM  tn_usr_mnu_atrt tb
+                          WHERE ta.mnu_id = tb.mnu_id
+                               AND tb.user_type = #{userType}
+                     )
+            AND ta.lvl=1
+            AND hir_mnu_id = #{hir_mnu_id}
+         ORDER BY ta.odr
+     </select>
+
+  
+    <!-- 회원가입 -->
+     <insert id="registerUser" parameterType="java.util.Map">
+     /*kr.happy.study.login.dao.LoginDao.registerUser*/
+     insert into tb_userinfo(
+     							loginID
+     						,	user_type
+     						,	password
+     						,	name
+     						,	user_email
+     						,	user_addr
+     						,	addr_detail
+     						,	user_post
+     						,	user_birth
+     						,	user_gender
+     						,	user_hp
+     						,	lec_yn
+     						,	user_active
+     						,	user_date
+     						,	file_no
+     
+     						) values(
+     								#{loginID} 
+								,	#{user_type}
+								,	#{password}  
+								,	#{name}  
+								,	#{user_email}
+								,	#{user_addr}    
+								,	#{addr_detail}  
+								,	#{user_post}   
+								,	#{user_birth}  
+								,	#{user_gender}  
+								,	#{user_hp}   
+								,	#{lec_yn}  
+								,	#{user_active} 	
+								,	now() 
+ 									<if test="(fileexist eq 'N'.toString()) "> 
+ 	               				,  	0
+ 	             					</if>
+ 	               					<if test="( fileexist eq 'Y'.toString())"> 
+ 	               				, (select ifnull(max(file_no),0) from tb_files) 
+ 	              					</if> 
+	              								
+     						)    											
+     </insert>
+     
+ 
+     <!-- 중복 검사  loginID 중복검사 -->
+	<select id="check_loginID" parameterType="String" resultType="int">
+		SELECT count(*)
+		FROM tb_userinfo
+		WHERE loginID = #{loginID}
+	</select>
+
+
+	<!-- 회원가입 이메일 중복 검사  -->
+	<select id="check_email" parameterType="String" resultType="int">
+		SELECT count(*)
+		FROM tb_userinfo
+		WHERE user_email = #{user_email}
+	</select>
+
+
+     <!-- 사용자 PW 찾기 ID 체크-->
+     <select id="registerIdCheck" resultType="kr.happyjob.study.login.model.LgnInfoModel">
+     SELECT     u.loginID as loginID
+     FROM    	tb_userinfo as u
+     WHERE   	u.user_active ="Y"
+     AND 	  	u.loginID = #{loginID}
+     </select>
+     
+     
+      <!-- 사용자 PW 초기화 하기-->
+     <update id="resetpwd">
+     	update tb_userinfo
+     	   set password = "0000"
+     	 where loginID = #{loginID}
+     </update>
+
+
+    <!-- 서류 파일 업로드 -->
+     <insert id="insertfile">
+     	 <selectKey resultType="int" keyProperty="no" order="BEFORE">
+            select ifnull(max(file_no),0) + 1 from tb_files
+        </selectKey>
+	     insert into tb_files (
+	     				file_no
+	     			   ,file_name
+	     			   ,file_physic_path
+	     			   ,file_logic_path
+	     			   ,file_size
+	     			   ,file_ext
+	     			   ,enr_date
+					)values(
+						#{no}
+	     			   ,#{filereturn.file_nm}
+	     			   ,#{filereturn.file_loc}
+	     			   ,#{filereturn.vrfile_loc}     
+	          		   ,#{filereturn.file_size}   
+	           		   ,#{filereturn.fileExtension}  
+	           		   ,now()					
+					)
+	</insert>
+
+</mapper>

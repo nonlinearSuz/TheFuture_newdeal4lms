@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.study.supmtb.dao.SupmtbDao">
+	<select id="lecTimeList" resultType="kr.happyjob.study.supmtb.model.MyTableModel">
+		
+		select le.lec_no,
+		        le.lec_name,
+		         le.lec_contents,
+		         le.lec_starttime,
+		         le.lec_endtime,
+		         le.lec_start,
+		         le.lec_end,
+		         le.lec_prof,
+		         ui.name,
+		         le.room_no,
+		         le.startTime,
+		         le.endTime,
+		         le.yoil,
+		         ro.rm_name,
+		         le.lecOpen_yn,
+		         rl.acc_yn
+		
+		from tb_lecture le
+		inner join tb_userinfo ui on ui.loginID = le.lec_prof		
+		inner join  tb_room ro on ro.room_no = le.room_no
+		   inner join tb_request_list rl on rl.lec_no = le.lec_no
+		where rl.loginID = #{loginID} and lec_start <![CDATA[<=]]> #{date} and #{date} <![CDATA[<=]]> lec_end 
+		 and rl.acc_yn not like 'C' and rl.acc_yn not like 'N'
+		
+		
+		
+	</select>
+</mapper>

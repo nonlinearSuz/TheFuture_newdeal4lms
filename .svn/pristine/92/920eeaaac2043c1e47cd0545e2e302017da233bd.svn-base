@@ -1,0 +1,125 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>    
+<!-- <div class="hidden"></div> -->
+      <dl>
+         <dt>
+            <strong>Q&A</strong>
+         </dt>
+         <dd class="content">
+            <!-- s : 여기에 내용입력 -->
+            		<table class="row">
+					<caption>caption</caption>
+					<colgroup>
+                                 <col width="120px">
+                                 <col width="70px">
+                                 <col width="70px">
+                                 <col width="*">
+                                 <col width="90px">
+					</colgroup>
+					<tbody>
+						<tr>
+							<th scope="row">글제목</th>
+							<td colspan="5"><input type="text" class="inputTxt p100"  id="title"  value="${qnasearch.qna_title }"/></td>
+						</tr>
+						<tr>
+							<th scope="row">카테고리</th>
+							<td>
+								<select id="category_namepopup2" name="category_namepopup2" >
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">작성자</th>
+							<td id="qna_writer" >${qnasearch.enr_user }</td>
+							<th scope="row">작성일</th>
+							<td colspan="5"  id="qna_date" >${qnasearch.enr_date }</td>
+						</tr>
+						<tr>
+							<td colspan="5" >
+							    <div><input type="text"  class="inputTxt p100 qna_contentsTo" id="qna_contentsTo" name="qna_contentsTo" value="${qnasearch.qna_contents }"/></div>
+							</td>
+						</tr>
+						<c:if test="${qnasearch.enr_user eq sessionScope.loginId}">
+						<tr>
+						<td colspan="5" align="center">
+							<a href="javascript:fn_saves(${qnasearch.qna_no });" class="btnType blue" id="btnUpdate" name="btn"><span>수정</span></a>
+							<a href="javascript:fn_saved(${qnasearch.qna_no });" class="btnType grey" id="btnDelete" name="btn"><span>삭제</span></a> 
+						</td>
+						</tr>
+						</c:if>
+					</tbody>
+				</table>
+			<div style="height: 300px; overflow: auto !important;">
+            <!-- 댓글 테이블 -->
+            <table class="row" id="rv_area" >
+               <caption>caption</caption>
+               <colgroup>
+                  <col width="15%">
+                  <col width="30%">
+                  <col width="25%">
+                  <col width="30%">
+               </colgroup>
+               
+               <tbody id="re_title">
+                  <tr>
+                     <th scope="row">댓글작성자</th>
+                     <th scope="row">댓글내용</th>
+                     <th scope="row">댓글작성일</th>
+                     <th scope="row">수정/삭제</th>
+                  </tr>
+               </tbody>   
+               <tbody id="re_body">
+						    <c:if test="${empty qnaRvList}">
+						        <tr>
+						            <td colspan="4">댓글이 없습니다.</td>
+						        </tr>
+						    </c:if>
+						    <c:if test="${not empty qnaRvList}">
+						        <c:forEach items="${qnaRvList}" var="reply">
+						          <c:if test="${reply.enr_user eq sessionScope.loginId}">
+						            <tr>
+						                <td>${reply.enr_user}</td>
+						                <td>
+						                    <input type="text" name="rpy_contents${reply.rpy_no}" id="rpy_contents${reply.rpy_no}" value="${reply.rpy_contents}">
+						                </td>
+						                <td>${reply.enr_date}</td>
+						                <td style="align:left" >
+						                        <a style="margin-right: 3px" class="btnType blue" href="javascript:fn_replyes(${reply.rpy_no});" id="btnReplyUpdate" name="btn"><span>수정</span></a>
+						                        <a class="btnType grey" href="javascript:fn_replyed(${reply.rpy_no});" id="btnReplyDelete" name="btn"><span>삭제</span></a>
+						                	</td>
+						            	</tr>
+						             </c:if>
+						               <c:if test="${reply.enr_user  ne sessionScope.loginId}">
+						            <tr>
+						                <td>${reply.enr_user}</td>
+						                <td>
+						                <input style="border:0;" type="text" name="rpy_contents${reply.rpy_no}" id="rpy_contents${reply.rpy_no}" value="${reply.rpy_contents}"  readonly>
+						                 <%--    <textarea  style="height: 1rem; border:0; "type="text" name="rpy_contents${reply.rpy_no}" id="rpy_contents${reply.rpy_no}"   readonly>${reply.rpy_contents}</textarea> --%>
+						                </td>
+						                <td>${reply.enr_date}</td>
+						             	  <td style="align:left"> 
+						                      <%--   <a style="margin-right: 3px" class="btnType blue" href="javascript:fn_replyes(${reply.rpy_no});" id="btnReplyUpdate" name="btn"><span>수정</span></a>
+						                        <a class="btnType grey" href="javascript:fn_replyed(${reply.rpy_no});" id="btnReplyDelete" name="btn"><span>삭제</span></a> --%>
+						                	</td> 
+						            	</tr>
+						             </c:if>
+						        </c:forEach>
+						    </c:if>
+						</tbody>
+            </table>
+            </div>
+            <input type="text"  id="rpy_content" style="height: 28px; width: 460px;">
+            <a href="javascript:fn_reply();" class="btnType blue" id="btnReply" name="btn" ><span>작성</span></a>
+            <!-- e : 여기에 내용입력 -->
+         </dd>
+      </dl>
+      <a href="" class="closePop" id="closeReplyPop"><span class="hidden">닫기</span></a>
+	
+
+	<input type="hidden" id="totalcnt" name="totalcnt" value="${totalcnt }"/>
+	<input type="hidden" id="qna_no"  name="qna_no"  />
+	<input type="hidden" id="reaction"  name="reaction"  />
+	<input type="hidden" id="rpy_no"  name="rpy_no" />
+	<input type="hidden" id="pageno"  name="pageno"  />

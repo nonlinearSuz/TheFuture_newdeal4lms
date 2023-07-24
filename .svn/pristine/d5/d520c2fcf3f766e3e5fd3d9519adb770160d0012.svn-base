@@ -1,0 +1,128 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+<!-- 	<div class="hidden"> -->
+			<dl>
+				<dt>
+				<strong>상세조회</strong>
+				</dt>
+				<dd class="content">
+				<!-- s : 여기에 내용입력 -->
+				<table class="row" >
+					<caption>caption</caption>
+					<colgroup>
+						<col width="120px">
+						<col width="*">
+						<col width="120px">
+						<col width="*">
+					</colgroup>
+					<tbody>
+						<tr>
+							<th scope="row">글제목</th>
+							<td colspan="3">
+								 <input type="text"  class="inputTxt p100 noti_title"  id="noti_title"  value="${noticesearch.nt_title }"></input>
+								<%-- <span  class="inputTxt p100" id="noti_title" >${noticesearch.nt_title }</span> --%>
+								</td>
+						</tr>
+						<tr>
+							<th scope="row">작성자</th>
+							<td><span  class="inputTxt p100" id="noti_writer" >${noticesearch.enr_user}</span></td>
+							<th scope="row">등록일</th>
+							<td><span  class="inputTxt p100" id="noti_date" >${noticesearch.enr_date }</span></td>
+						</tr>
+						<tr>
+							<td colspan="4">
+								<div><input type="text"  class="inputTxt p100 noti_contents" id="noti_contents"  value="${noticesearch.nt_contents }"></input></div>
+							</td>
+						</tr>
+						<!-- 글 작성자 일때 버튼 생성 -->
+						<c:if test="${noticesearch.enr_user eq sessionScope.loginId }">
+						<tr>
+							<td colspan="4" align="center" >
+								<a href="javascript:fn_save();" class="btnType blue" id="btnUpdate" name="btn"><span>수정</span></a>
+								<a href="javascript:fn_saved();" class="btnType grey" id="btnDelete" name="btn"><span>삭제</span></a>
+							</td>
+						</tr>
+						</c:if>
+					</tbody>
+				</table>
+				<div style="height: 200px; overflow: auto !important;">
+				<!-- 댓글 테이블 -->
+				<table class="col" >
+					<caption>댓글 테이블</caption>
+					<colgroup>
+						<col width="10%">
+						<col width="40%">
+						<col width="20%">
+						<col width="30%">
+					</colgroup>
+
+					<tbody>
+						<tr>
+							<th scope="col">댓글작성자</th>
+							<th scope="col">댓글내용</th>
+							<th scope="col">댓글작성일</th>
+							<th scope="col">수정/삭제</th>
+						</tr>
+					</tbody>
+					
+					<tbody>
+						<c:if test="${empty noticeRvList}">
+		                     	<tr>
+			                   	 <td colspan="3">댓글이 없습니다.</td>
+		                     	</tr>
+	                    	 </c:if>
+	                      	<c:if test="${not empty noticeRvList }">
+		                           <c:forEach items="${noticeRvList}" var="reply">
+		                           	<c:if test="${reply.enr_user eq sessionScope.loginId }">
+			                           <tr>
+			                           		<td> ${reply.enr_user }</td>
+			                             	<td>
+			                             		<input type="text" name="rpy_contents"${reply.rpy_no }  id="rpy_contents${reply.rpy_no }" value="${reply.rpy_contents }"/>
+			                             	</td>
+				                            <td>${reply.enr_date}</td>
+				                           	<td style="align:left">                       	    
+								      			<a style="margin-right: 3px display:block;" class="btnType blue" 
+										      		href="javascript:fn_replyes(${reply.rpy_no});" id="btnReplyUpdate" name="btn" ><span>수정</span></a>
+       											<a class="btnType grey" href="javascript:fn_replyed(${reply.rpy_no});"  id="btnReplyDelete"  name="btn"><span>삭제</span></a>
+     										</td> 
+			                         	</tr>
+			                          </c:if>
+   		                           	<c:if test="${reply.enr_user ne sessionScope.loginId }">
+			                           <tr>
+			                           		<td> ${reply.enr_user }</td>
+			                             	<td>
+			                             		<input style="border:0;" type="text" name="rpy_contents"${reply.rpy_no }  id="rpy_contents${reply.rpy_no }" value="${reply.rpy_contents }" readonly/>
+			                             	</td>
+				                            <td>${reply.enr_date}</td>
+				                           	<td style="align:left">                       	    
+<%-- 								      			<a style="margin-right: 3px display:block;" class="btnType blue" 
+										      		href="javascript:fn_replyes(${reply.rpy_no});" id="btnReplyUpdate" name="btn" ><span>수정</span></a>
+       											<a class="btnType grey" href="javascript:fn_replyed(${reply.rpy_no});"  id="btnReplyDelete"  name="btn"><span>삭제</span></a> --%>
+     										</td> 
+			                         	</tr>
+			                          </c:if>
+		                          </c:forEach>
+	                    	 </c:if>
+						</tbody>
+					</table>
+				</div>
+				<c:if test= "${sessionScope.userType eq 'T' || sessionScope.userType eq 'S' }">
+				<input type="text"  id="rpy_content" style="height: 28px; width: 350px;">
+				<a href="javascript:fn_reply();" class="btnType blue" id="btnReply" name="btn" ><span>작성</span></a>
+				</c:if>
+				<!-- e : 여기에 내용입력 -->
+			</dd>
+		</dl>
+		<a href="" class="closePop" id="closeRePop"><span class="hidden">닫기</span></a>
+	<!--  </div> --> 
+<!-- <input type="hidden" id="myForm" name="myForm"/> -->
+<input type="hidden" id="totalcnt" name="totalcnt" value="${totalcnt }"/>
+<input type="hidden" id="action"  name="action"  />
+<input type="hidden" id="rpy_no"  name="rpy_no"  value="${reply.rpy_no}"/> 
+<input type="hidden" id="pageno"  name="pageno"  />
+<%-- <input type="hidden" id="nt_no" name="nt_no" value="${nt_no }"/> --%>
+
+

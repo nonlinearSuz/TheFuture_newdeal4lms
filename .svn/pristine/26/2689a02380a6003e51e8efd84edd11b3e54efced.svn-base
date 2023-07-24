@@ -1,0 +1,56 @@
+package kr.happyjob.study.supass.service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import kr.happyjob.study.supass.model.AssignmentModel;
+import kr.happyjob.study.supass.model.LectureModel;
+
+public interface SupassService {
+	List<LectureModel> selectBoxSet(Map<String, Object> paramMap) throws Exception;
+
+	List<LectureModel> selectBoxSetStudent(Map<String, Object> paramMap) throws Exception;
+
+	List<LectureModel> lectureList(Map<String, Object> paramMap) throws Exception;
+
+	List<LectureModel> lectureListByStudent(Map<String, Object> paramMap)throws Exception;
+
+	int countLectureList(Map<String, Object> paramMap)throws Exception;
+
+	int countLectureListByStudent(Map<String, Object> paramMap) throws Exception;
+
+	List<AssignmentModel> assignmentList(Map<String, Object> paramMap) throws Exception;
+	List<AssignmentModel> assignmentTeacherList(Map<String, Object> paramMap) throws Exception;
+
+	int countAssignmentTodoList(Map<String, Object> paramMap) throws Exception;
+
+	int assignTeacherInsertFile(Map<String, Object> paramMap, HttpServletRequest request)throws Exception;
+
+	int assignTeacherUpdateFile(Map<String, Object> paramMap, HttpServletRequest request)throws Exception;
+
+	int assignTeacherDeleteFile(Map<String, Object> paramMap)throws Exception;
+
+	AssignmentModel assignTeacherSelectOne(Map<String, Object> paramMap)throws Exception;
+
+	AssignmentModel assignTaskSelectOne(Map<String, Object> paramMap) throws Exception;
+
+	int existTaskSend(Map<String, Object> paramMap) throws Exception;
+
+	AssignmentModel assignNotExistSelectOne(Map<String, Object> paramMap) throws Exception;
+
+	int assignStudentInsertFile(Map<String, Object> paramMap, HttpServletRequest request) throws Exception;
+
+	int assignStudentUpdateFile(Map<String, Object> paramMap, HttpServletRequest request)throws Exception;
+
+	int assignStudentDeleteFile(Map<String, Object> paramMap)throws Exception;
+
+	List<AssignmentModel> assignSubmitList(Map<String, Object> paramMap) throws Exception;
+
+	int countAssignSubmitList(Map<String, Object> paramMap) throws Exception;
+
+	AssignmentModel submitStuSelectOne(Map<String, Object> paramMap) throws Exception;
+
+
+}

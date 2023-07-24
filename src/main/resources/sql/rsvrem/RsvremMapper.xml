@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.happyjob.study.rsvrem.dao.RsvremDao">
+
+	
+
+	<select id="bookingList" resultType="kr.happyjob.study.rsvrem.model.ReservationModel">
+	
+		
+		select * from tb_study_booking sb
+inner join tb_userinfo ON tb_userinfo.loginID = sb.loginID where book_date = #{date}
+	</select>
+	
+	<!-- tb_studymeeting까지 합쳐서 출력. -->
+	<select id="bookingAndMeetList" resultType="kr.happyjob.study.rsvrem.model.ReservationModel">
+                    select * 
+         from tb_study_booking sb
+				      left outer join ( 
+                    select   sm.sturm_no 
+                  						                 ,sm.book_no
+                  				                         ,group_concat(sm.loginID) as concatloginID   
+                                              ,group_concat(ui.name) as concatname   
+                  					             	     ,count(*) as cnt
+                  				                  from tb_studymeeting sm
+                                                         inner join tb_userinfo ui on ui.loginID = sm.loginID
+                  				                 group by book_no             
+                    ) meeting on meeting.book_no = sb.book_no
+                    		    inner join tb_userinfo ui on ui.loginID = sb.loginID
+				    inner join tb_studyroom sr on sr.sturm_no = sb.sturm_no
+
+    where book_date = #{date}
+	
+	</select>
+	
+	
+	<select id="selectOne" resultType="kr.happyjob.study.rsvrem.model.ReservationModel">
+	            select * 
+         from tb_study_booking sb
+				      left outer join ( 
+                    select   sm.sturm_no 
+                  						                 ,sm.book_no
+                  				                         ,group_concat(sm.loginID) as concatloginID   
+                                              ,group_concat(ui.name) as concatname   
+                  					             	     ,count(*) as cnt
+                  				                  from tb_studymeeting sm
+                                                         inner join tb_userinfo ui on ui.loginID = sm.loginID
+                  				                 group by book_no             
+                    ) meeting on meeting.book_no = sb.book_no
+                    		    inner join tb_userinfo ui on ui.loginID = sb.loginID
+				    inner join tb_studyroom sr on sr.sturm_no = sb.sturm_no
+
+    where sb.book_no = #{book_no}
+	</select>
+	
+	
+	<select id="confirmMaxCnt" resultType="kr.happyjob.study.rsvrem.model.StudyroomModel">
+		select * from tb_studyroom where sturm_no = #{roomlist}
+	</select>
+	
+	
+		<select id="selectBoxSet" resultType="kr.happyjob.study.rsvrem.model.StudyroomModel">
+		select * from tb_studyroom
+	</select>
+
+		<select id="roomList" resultType="kr.happyjob.study.rsvrem.model.StudyroomModel">
+		select * from tb_studyroom
+	</select>
+
+	<!-- 중복이 존재하는지 체크 -->
+ 	<select id="checksameTime" resultType ="int">
+		 
+		select count(*) as cnt from tb_study_booking where book_start <![CDATA[<]]>  date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')
+		and book_end  <![CDATA[>]]>   date_format(#{startTime},  '%Y-%m-%d %H:%i:%s') and sturm_no = #{room_no}
+	</select>  
+	
+	<select id="check_sameTime_otherRoom" resultType ="int">
+		 
+		select count(*) as cnt from tb_study_booking 
+		
+		where book_start <![CDATA[<]]>  date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')
+		and book_end  <![CDATA[>]]>   date_format(#{startTime},  '%Y-%m-%d %H:%i:%s') 
+		
+		and loginID = #{loginID}
+	</select>  
+	
+	<select id="check_sameTime_otherMeeting" resultType="int">
+	
+			select count(*) as cnt  from tb_study_booking sb  
+ 		left outer join tb_studymeeting sm on sm.book_no = sb.book_no
+		
+		where book_start <![CDATA[<]]>  date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')
+		and book_end  <![CDATA[>]]>   date_format(#{startTime},  '%Y-%m-%d %H:%i:%s') 
+		
+		and sm.loginID = #{loginID}
+	
+	</select>
+	
+	
+	<!-- 자기자신의 예약이 이미 존재하는지 체크 -->
+	<select id="countMyRsvOne" resultType="int">
+		select count(*) as cnt from tb_study_booking where book_no = #{book_no} and loginID = #{loginID}
+	</select>
+	<!-- 자기자신의 예약을 제외한 중복이 존재하는지 체크 -->
+	<select id="checksameTimeNotMine" resultType="int">
+			select count(*) as cnt from tb_study_booking where book_start <![CDATA[<]]>  date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')
+		and book_end  <![CDATA[>]]>   date_format(#{startTime},  '%Y-%m-%d %H:%i:%s') and sturm_no = #{room_no} and book_no not like #{book_no}
+	</select>
+	<!-- 자기제외한 중복이 다른 룸에도 존재하는지 -->
+	<select id="check_sameTime_otherRoom_notMine" resultType ="int">
+		 
+		select count(*) as cnt from tb_study_booking where book_start <![CDATA[<]]>  date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')
+		and book_end  <![CDATA[>]]>   date_format(#{startTime},  '%Y-%m-%d %H:%i:%s') and loginID = #{loginID} and book_no not like #{book_no}
+	</select>  
+	
+	
+	<select id="check_sameTime_otherMeetingNotMine" resultType="int">
+	
+			select count(*) as cnt  from tb_study_booking sb  
+ 		left outer join tb_studymeeting sm on sm.book_no = sb.book_no
+		
+		where book_start <![CDATA[<]]>  date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')
+		and book_end  <![CDATA[>]]>   date_format(#{startTime},  '%Y-%m-%d %H:%i:%s') 
+		
+		and sm.loginID = #{loginID} and sb.book_no not like #{book_no}
+	
+	</select>
+	
+	
+	<!-- 나의 예약현황 -->
+
+	<select id="myBookingList" resultType="kr.happyjob.study.rsvrem.model.ReservationModel">
+	
+		
+			select	 *	       
+		
+		from tb_study_booking sb
+		inner join tb_studyroom sr on sr.sturm_no = sb.sturm_no
+		 where loginID = #{loginID} and book_date <![CDATA[>=]]> #{today}
+		 
+	</select>
+	
+
+	 	<select id="countMyBookingList" resultType ="int">
+		 
+	select count(*)
+	
+	 from tb_study_booking sb
+	   inner join tb_studyroom sr on sr.sturm_no = sb.sturm_no
+	where loginID = #{loginID} and book_date <![CDATA[>=]]> #{today}
+
+	</select>  
+	
+	<insert id="bookInsert"> 
+	<!-- before insert문ㅅ닐행전에 쿼리문실행해라. --> <!-- no라는 변수를 형성함. -->
+	    <selectKey resultType="int" keyProperty="no" order="BEFORE"> <!-- order before/after -->
+          select ifnull(max(book_no),0) + 1 from tb_study_booking
+        </selectKey>   
+	
+		insert into tb_study_booking
+			(
+				book_no
+				,loginID
+				,sturm_no
+				,book_start
+				,book_end
+				,book_per_cnt
+				,startTime
+				,endTime
+				,book_date
+				,book_title
+				,book_cont
+				,bgcolor
+			
+			)
+			values (
+				<!-- no : selectKey -->
+				#{no}
+				,#{loginID}
+				,#{roomlist}
+				,date_format(#{startTime},  '%Y-%m-%d %H:%i:%s')
+				,date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')	
+				,#{booking_cnt}
+				,#{booking_stime}
+				,#{booking_etime}
+				,#{booking_date}
+				,#{booking_title}
+				,#{booking_cont}
+				,#{booking_color}				
+				
+	
+			
+				
+			)
+	</insert>
+	
+	<insert id="makeMeeting">
+	 <selectKey resultType="int" keyProperty="no" order="BEFORE"> <!-- order before/after -->
+          select ifnull(max(book_no),0)  from tb_study_booking
+        </selectKey>   
+		insert into tb_studymeeting		
+		(sturm_no, book_no, loginID, host_yn) 
+		values 
+		(#{roomlist},
+		 #{no},
+		 #{loginID},
+		 'Y'		 
+		)
+	</insert>
+	
+	<insert id="attendMeeting">
+
+		insert into tb_studymeeting		
+		(sturm_no, book_no, loginID, host_yn) 
+		values 
+		(#{room_no},
+		 #{book_no},
+		 #{loginID},
+		 'N'		 
+		)
+	</insert>
+	
+	<select id="existAtMeeting" resultType="int">
+	
+		select count(*) as cnt from tb_studymeeting where sturm_no=#{room_no}
+		 and book_no=#{book_no} and loginID =#{loginID};
+	</select>
+	
+	<update id="bookUpdate">
+		update tb_study_booking 
+			set  book_title= #{booking_title}
+				,book_cont = #{booking_cont}
+				,bgcolor = #{booking_color}
+				,book_start = date_format(#{startTime},  '%Y-%m-%d %H:%i:%s')
+				,book_end = date_format(#{endTime},  '%Y-%m-%d %H:%i:%s')
+				,book_per_cnt = #{booking_cnt}
+				,startTime = #{booking_stime}
+				,endTime = #{booking_etime}
+				,book_date = #{booking_date}
+				,sturm_no =#{roomlist}
+			
+		where book_no = #{book_no}	
+	</update>
+	
+	<delete id="bookDelete">
+		delete from tb_study_booking where book_no = #{book_no}
+		
+	</delete>
+	
+	<delete id="meetingDelete">
+		delete from tb_studymeeting where book_no = #{book_no}
+	</delete>
+	
+	<delete id="outMeeting">
+		delete from tb_studymeeting where book_no= #{book_no} and loginID = #{loginID}
+	</delete>
+	
+	
+</mapper>

@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.suplcd.dao.SuplcdDao">
+	
+	<!-- 관리자  강의 계획서 리스트  -->
+	<select id="totalLecPlanList" resultType="kr.happyjob.study.suplcd.model.LectureDtPlanModel">
+		select lc.lec_no
+		      ,lc.lec_name
+		      ,ui.name
+		      ,date_format(lc.lec_start,'%Y.%m.%d') as lec_start
+		      ,date_format(lc.lec_end,'%Y.%m.%d') as lec_end
+		      ,lc.room_no
+		      ,ifnull(A.cnt,0) as lec_signcnt
+		      ,lc.max_no
+		      ,lc.lecOpen_yn
+	   from tb_lecture lc
+	         inner join tb_userinfo ui on ui.loginID = lc.lec_prof
+	         left outer join (select lec_no, count(*) cnt from tb_request_list WHERE acc_yn NOT IN ('N' ,'C','P') group by lec_no) A on A.lec_no= lc.lec_no
+	   <where>
+	   		 <if test="(lecStatus !=null ) and (lecStatus eq 'ing'.toString() )">
+	   			<![CDATA[ and lec_end > now() and lec_start<now() ]]>	
+	   		</if>
+	   		<if test="(lecStatus !=null ) and (lecStatus eq 'expected'.toString() )">
+	   			<![CDATA[ and lec_start > now() ]]>
+	   		</if>
+	   		<if test="(lecStatus !=null ) and (lecStatus eq 'end'.toString() )">
+	   			<![CDATA[ and lec_end < now() ]]>
+	   		</if>
+	   		 
+	   		 <if test=" (sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'subject'.toString()">
+						and lc.lec_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					 <when
+						test="searchKey eq 'prof_nm'.toString()">
+						and ui.name LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						 and (   lc.lec_name Like CONCAT('%', #{sname}, '%')
+						       or ui.name LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>		
+	   </where>
+	   LIMIT #{pageindex}, #{pageSize}
+	</select>
+	
+	<!-- 관리자  페이지네이션 -->
+	<select id="cntLecPlanList" resultType="int">
+	 	select count(*)
+	 	from tb_lecture lc
+	 	     inner join tb_userinfo ui on ui.loginID = lc.lec_prof
+	 	     left outer join (select lec_no, count(*) cnt from tb_request_list WHERE acc_yn NOT IN ('N' ,'C','P') group by lec_no) A on A.lec_no= lc.lec_no
+	 	<where>
+	 		<if test="(lecStatus !=null ) and (lecStatus eq 'ing'.toString() )">
+	   			<![CDATA[ and lec_end > now() ]]>
+	   		</if>
+	   		<if test="(lecStatus !=null ) and (lecStatus eq 'expected'.toString() )">
+	   			<![CDATA[ and lec_start > now() ]]>
+	   		</if>
+	   		<if test="(lecStatus !=null ) and (lecStatus eq 'end'.toString() )">
+	   			<![CDATA[ and lec_end < now() ]]>
+	   		</if>
+	   		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'subject'.toString()">
+						and lc.lec_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<when
+						test="searchKey eq 'prof_nm'.toString()">
+						and ui.name LIKE CONCAT('%', #{sname}, '%')
+					</when> 
+					<otherwise>
+						 and (   lc.lec_name Like CONCAT('%', #{sname}, '%')
+						       or ui.name LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>
+	 	</where>
+	</select>
+	
+	<!-- [관리자] 강의 승인 -->
+	<update id="lecApprovUpdate">
+	    update tb_lecture lc
+	         set lc.lecOpen_yn=#{lecOpen_yn} 
+	     where  lec_no =  #{lec_no}  
+	</update>
+	
+	
+	<!-- 강사 강의 계획서 리스트  -->
+	<select id="profLecPlanList" resultType="kr.happyjob.study.suplcd.model.LectureDtPlanModel">
+	  select lc.lec_no
+		      ,lc.lec_name
+		      ,ui.name
+		      ,date_format(lc.lec_start,'%Y.%m.%d') as lec_start
+		      ,date_format(lc.lec_end,'%Y.%m.%d') as lec_end
+		      ,lc.room_no
+		      ,ifnull(A.cnt,0) as lec_signcnt
+		      ,lc.max_no
+		      ,lc.lecOpen_yn
+	   from tb_lecture lc
+	   inner join tb_userinfo ui on ui.loginID = lc.lec_prof
+	   left outer join (select lec_no, count(*) cnt from tb_request_list WHERE acc_yn NOT IN ('N' ,'C') group by lec_no) A on A.lec_no= lc.lec_no
+	   <where>
+	   	lc.lec_prof =#{loginID}
+	   		<if test="(lecStatus !=null ) and (lecStatus eq 'ing'.toString() )">
+	   			<![CDATA[ and lec_end > now() and lec_start<now() ]]>
+	   		</if>
+	   		<if test="(lecStatus !=null ) and (lecStatus eq 'expected'.toString() )">
+	   			<![CDATA[ and lec_start > now() ]]>
+	   		</if>
+	   		<if test="(lecStatus !=null ) and (lecStatus eq 'end'.toString() )">
+	   			<![CDATA[ and lec_end < now() ]]>
+	   		</if>
+	   		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'subject'.toString()">
+						and lc.lec_name LIKE CONCAT('%', #{sname}, '%')
+					</when> 
+					<!-- <otherwise>
+						 and (   lc.lec_name Like CONCAT('%', #{sname}, '%')
+						       or ui.name LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise> -->
+				</choose>
+			</if>
+	   </where>
+	   LIMIT #{pageindex}, #{pageSize}
+	</select>
+	
+	<!-- 강사  페이지네이션 -->
+	<select id="cntProfLecPlanList" resultType="int">
+	 	select count(*)
+	 	from tb_lecture lc
+	 	<where>
+	   	lc.lec_prof =#{loginID}
+	   	<if test="(lecStatus !=null ) and (lecStatus eq 'ing'.toString() )">
+	   			<![CDATA[ and lec_end > now() ]]>
+	   		</if>
+	   		<if test="(lecStatus !=null ) and (lecStatus eq 'expected'.toString() )">
+	   			<![CDATA[ and lec_start > now() ]]>
+	   		</if>
+	   		<if test="(lecStatus !=null ) and (lecStatus eq 'end'.toString() )">
+	   			<![CDATA[ and lec_end < now() ]]>
+	   		</if>
+	   		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'subject'.toString()">
+						and lc.lec_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<!--  <otherwise>
+						 and (   lc.lec_name Like CONCAT('%', #{sname}, '%')
+						       or ui.name LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise> -->
+				</choose>
+			</if>
+	   </where>
+	</select>
+	
+	<!-- 강의 하나 선택시  -->
+	 <select id="lectureDtselectone" resultType="kr.happyjob.study.suplcd.model.LectureDtPlanModel">
+	  select lc.lec_name
+	  		,lc.lec_no
+	   	<!-- ,ui.name AS lec_prof  -->
+	   	 	 ,lc.lec_prof  
+	    <!--  ,rm.rm_name AS room_no  -->
+	         ,rm.room_no AS room_no
+	         ,rm.rm_name
+	         ,date_format(lc.test_start,'%Y-%m-%d') as test_start
+	        <!--  ,lc.test_start -->
+		     ,lc.lec_start
+		     ,lc.lec_end
+		     ,lc.lec_goal
+		     ,lc.lec_contents
+		     ,lc.max_no
+		     ,lc.sv_no
+		     ,lc.test_no
+		     ,date_format(lc.lec_starttime,'%H:%i:%s') lec_starttime 
+		     ,date_format(lc.lec_endtime,'%H:%i:%s') lec_endtime
+		     ,lc.yoil
+		     ,lc.starttime
+		     ,lc.endtime
+		     ,ui.user_email
+		     ,ui.user_hp
+		     ,ui.name
+		     ,lc.file_no
+		     ,fi.file_name
+	         ,fi.file_logic_path
+	         ,fi.file_physic_path
+	         ,fi.file_size
+	         ,fi.file_ext
+	     from tb_lecture lc
+		 inner join tb_userinfo ui ON ui.loginID =  lc.lec_prof 
+		 inner join tb_room rm ON rm.room_no = lc.room_no
+		 left outer join tb_files fi ON  fi.file_no = lc.file_no 
+		 where lc.lec_no =  #{lec_no} 
+		</select> 
+	
+		<!-- 강의 상세 계획서 수정 update -->
+		<update id="lectureDtUpdate">
+	    update tb_lecture
+	         set 
+			     lec_goal = #{lec_goal}
+			     ,lec_contents = #{lec_contents}
+			     , upd_user =#{loginID}
+			     , upd_date = now()
+			     <if test="fileexist eq 'Y'.toString()">
+                , file_no = (select ifnull(max(file_no),0)  from tb_files)
+                </if>
+                <if test="fileexist eq 'N'.toString()">
+                , file_no = 0
+                </if>
+	     where  lec_no =  #{lec_no}  
+		</update>
+		
+		
+		<!-- 강의 상세 계획서 삭제 update -->
+		<update id="lectureDtDelete">
+	    update tb_lecture
+	         set 
+			     lec_goal = ""
+			     ,lec_contents = ""
+			     , upd_user =#{loginID}
+			     , upd_date = now()
+			     <if test="fileexist eq 'Y'.toString()">
+                , file_no = (select ifnull(max(file_no),0)  from tb_files)
+                </if>
+                <if test="fileexist eq 'N'.toString()">
+                , file_no = 0
+                </if>
+	     where  lec_no =  #{lec_no}  
+		</update>
+	
+	<!-- 파일 입력  -->
+	<insert id="fileinsert">
+	    <selectKey resultType="int" keyProperty="no" order="BEFORE">
+            select ifnull(max(file_no),0) + 1 from tb_files
+        </selectKey>  
+	    insert into tb_files
+	         (
+	             file_no
+               , file_name
+               , file_logic_path
+               , file_physic_path
+               , file_size
+               , file_ext
+               , enr_date
+	         ) values (
+	            #{no}
+	           ,#{filereturn.file_nm}   
+	           ,#{filereturn.vrfile_loc}   
+	           ,#{filereturn.file_loc}   
+	           ,#{filereturn.file_size}   
+	           ,#{filereturn.fileExtension}  
+	           ,#{filereturn.enr_date}
+	         )
+	</insert>
+	
+	<!-- 파일 삭제  -->
+    <delete id="deletefileinfo">
+	         delete from tb_files
+             where file_no = ( 
+                                       select file_no 
+                                        from tb_lecture
+                                      where lec_no = #{lec_no} 
+                                   )
+	</delete>
+	
+	
+</mapper>

@@ -1,0 +1,363 @@
+package kr.happyjob.study.suplcd.model;
+
+public class LectureDtPlanModel {
+
+	/*강의 관련정보*/
+	public String getLoginId() {
+		return loginId;
+	}
+	public void setLoginId(String loginId) {
+		this.loginId = loginId;
+	}
+	
+
+	public int getLec_no() {
+		return lec_no;
+	}
+	public void setLec_no(int lec_no) {
+		this.lec_no = lec_no;
+	}
+	public String getLecDel_yn() {
+		return lecDel_yn;
+	}
+	public void setLecDel_yn(String lecDel_yn) {
+		this.lecDel_yn = lecDel_yn;
+	}
+	public int getMax_no() {
+		return max_no;
+	}
+	public void setMax_no(int max_no) {
+		this.max_no = max_no;
+	}
+	public String getUpd_date() {
+		return upd_date;
+	}
+	public void setUpd_date(String upd_date) {
+		this.upd_date = upd_date;
+	}
+	public String getUpd_user() {
+		return upd_user;
+	}
+	public void setUpd_user(String upd_user) {
+		this.upd_user = upd_user;
+	}
+	public String getEnr_date() {
+		return enr_date;
+	}
+	public void setEnr_date(String enr_date) {
+		this.enr_date = enr_date;
+	}
+	public String getEnr_user() {
+		return enr_user;
+	}
+	public void setEnr_user(String enr_user) {
+		this.enr_user = enr_user;
+	}
+	public String getLec_prof() {
+		return lec_prof;
+	}
+	public void setLec_prof(String lec_prof) {
+		this.lec_prof = lec_prof;
+	}
+	public String getLec_end() {
+		return lec_end;
+	}
+	public void setLec_end(String lec_end) {
+		this.lec_end = lec_end;
+	}
+	public String getLec_start() {
+		return lec_start;
+	}
+	public void setLec_start(String lec_start) {
+		this.lec_start = lec_start;
+	}
+	public String getLec_endtime() {
+		return lec_endtime;
+	}
+	public void setLec_endtime(String lec_endtime) {
+		this.lec_endtime = lec_endtime;
+	}
+	public String getLec_starttime() {
+		return lec_starttime;
+	}
+	public void setLec_starttime(String lec_starttime) {
+		this.lec_starttime = lec_starttime;
+	}
+	/*public String getLec_plan() {
+		return lec_plan;
+	}
+	public void setLec_plan(String lec_plan) {
+		this.lec_plan = lec_plan;
+	}*/
+	public String getLec_goal() {
+		return lec_goal;
+	}
+	public void setLec_goal(String lec_goal) {
+		this.lec_goal = lec_goal;
+	}
+	public String getLec_contents() {
+		return lec_contents;
+	}
+	public void setLec_contents(String lec_contents) {
+		this.lec_contents = lec_contents;
+	}
+	public String getLec_enr() {
+		return lec_enr;
+	}
+	public void setLec_enr(String lec_enr) {
+		this.lec_enr = lec_enr;
+	}
+	public String getLec_name() {
+		return lec_name;
+	}
+	public void setLec_name(String lec_name) {
+		this.lec_name = lec_name;
+	}
+	public int getLec_signcnt() {
+		return lec_signcnt;
+	}
+	public void setLec_signcnt(int lec_signcnt) {
+		this.lec_signcnt = lec_signcnt;
+	}
+	public int getRoom_no() {
+		return room_no;
+	}
+	public void setRoom_no(int room_no) {
+		this.room_no = room_no;
+	}
+	public String getRm_name() {
+		return rm_name;
+	}
+	public void setRm_name(String rm_name) {
+		this.rm_name = rm_name;
+	}
+	public int getFile_no() {
+		return file_no;
+	}
+	public void setFile_no(int file_no) {
+		this.file_no = file_no;
+	}
+	public String getFile_ext() {
+		return file_ext;
+	}
+	public void setFile_ext(String file_ext) {
+		this.file_ext = file_ext;
+	}
+	public String getFile_enr_date() {
+		return file_enr_date;
+	}
+	public void setFile_enr_date(String file_enr_date) {
+		this.file_enr_date = file_enr_date;
+	}
+	public int getFile_size() {
+		return file_size;
+	}
+	public void setFile_size(int file_size) {
+		this.file_size = file_size;
+	}
+	public String getFile_logic_path() {
+		return file_logic_path;
+	}
+	public void setFile_logic_path(String file_logic_path) {
+		this.file_logic_path = file_logic_path;
+	}
+	public String getFile_physic_path() {
+		return file_physic_path;
+	}
+	public void setFile_physic_path(String file_physic_path) {
+		this.file_physic_path = file_physic_path;
+	}
+	public String getFile_name() {
+		return file_name;
+	}
+	public void setFile_name(String file_name) {
+		this.file_name = file_name;
+	}
+	public String getWeek() {
+		return week;
+	}
+	public void setWeek(String week) {
+		this.week = week;
+	}
+	public String getWeek_tmp() {
+		return week_tmp;
+	}
+	public void setWeek_tmp(String week_tmp) {
+		this.week_tmp = week_tmp;
+	}
+	
+	
+	/*로그인아이디*/  /*임시로 login 으로 사용함 */
+	private String loginId;
+	
+	/*전체 정보*/
+	private String lec_yn;
+	public String getLec_yn() {
+		return lec_yn;
+	}
+	public void setLec_yn(String lec_yn) {
+		this.lec_yn = lec_yn;
+	}
+	public String getUser_hp() {
+		return user_hp;
+	}
+	public void setUser_hp(String user_hp) {
+		this.user_hp = user_hp;
+	}
+	public String getUser_email() {
+		return user_email;
+	}
+	public void setUser_email(String user_email) {
+		this.user_email = user_email;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getUser_type() {
+		return user_type;
+	}
+	public void setUser_type(String user_type) {
+		this.user_type = user_type;
+	}
+	/*수강 학생정보*/
+	public String getAcc_yn() {
+		return acc_yn;
+	}
+	public void setAcc_yn(String acc_yn) {
+		this.acc_yn = acc_yn;
+	}
+
+	/*전체 정보*/
+	private String user_hp;
+	private String user_email;
+	private String name;
+	private String user_type;
+	
+	
+	/*수강 학생정보*/
+	private String acc_yn; /* 강의 승인 여부 */
+	
+	
+	
+	
+
+	/*강의 관련정보*/
+	private int lec_no;					/*강의 번호*/
+	private String lecDel_yn;  			/*강의 삭제 여부*/
+	private int max_no; 				/*강의 최대 수용인원*/
+	private String upd_date;			/*강의 삭제 여부*/
+	private String upd_user;			/*강의 수정자*/
+	private String enr_date;			/*강의 등록일자*/
+	private String enr_user;			/*강의 등록자*/
+	private String lec_prof;			/*강의 담당교수  --> 불러올때 loginid로 */
+	private String lec_end;				/*강의 강의종료일*/
+	private String lec_start;			/*강의 강의시작일*/
+	private String lec_endtime;			/*강의 강의종료시간*/
+	private String lec_starttime;		/*강의 강의시작시간*/	
+/*??	private String lec_plan;*/		/*강의 강의계획*/
+	private String lec_goal;			/*강의 강의목표*/
+	private String lec_contents;		/*강의 강의내용*/
+	private String lec_enr;				/*강의 등록일*/
+	private String lec_name;			/*강의강의명*/
+	
+	
+
+	
+	public String getLecOpen_yn() {
+		return lecOpen_yn;
+	}
+	public void setLecOpen_yn(String lecOpen_yn) {
+		this.lecOpen_yn = lecOpen_yn;
+	}
+
+
+	private String lecOpen_yn; 			/*강의 승인여부*/
+	
+	public int getTest_no() {
+		return test_no;
+	}
+	public void setTest_no(int test_no) {
+		this.test_no = test_no;
+	}
+	public int getSv_no() {
+		return sv_no;
+	}
+	public void setSv_no(int sv_no) {
+		this.sv_no = sv_no;
+	}
+
+
+	private int test_no;   /*시험번호 */
+	private int sv_no;     /*설문번호 */
+	
+	
+	private String test_end;  			/*시험 종료 날짜*/
+	private String test_start;			/*시험 시작 날짜*/
+	
+	public String getTest_end() {
+		return test_end;
+	}
+	public void setTest_end(String test_end) {
+		this.test_end = test_end;
+	}
+	public String getTest_start() {
+		return test_start;
+	}
+	public void setTest_start(String test_start) {
+		this.test_start = test_start;
+	}
+
+
+	
+	
+	
+	/*수강신청인원 카운트 변수*/
+	private int lec_signcnt;  			 /*신청인원 카운트 변수 */
+	
+
+	
+	/*강의실 관련정보 */
+	private int room_no;  			 	/*강의실 번호*/
+	private String rm_name;				/*강의실 이름*/
+	
+	
+	/*강의 상세 계획서 파일 관련 변수 */
+	private int file_no;				/*파일 번호*/
+	private String file_ext;			/*파일 확장자*/
+	private String file_enr_date;		/*파일 등록일*/
+	private int file_size;				/*파일 사이즈*/
+	private String file_logic_path;	/*파일 논리경로*/
+	private String file_physic_path;	/*파일 물리경로*/
+	private String file_name;			/*파일명*/
+	
+	
+	/*주차계획 2way - 1)간단/ 2)주차별입력  */
+	 private String week;				/*파일 주차 간단 정보*/
+	 private String week_tmp;			/*파일 주차 상세 정보 -  주차별 테이블 없어서 불가함. */
+
+	 
+	 /*전체정보, 수강학생 정보 입력 안했음. 주차 빼야할듯.  */
+	 @Override
+	 public String toString(){
+		 return "LectureDtPlanModel [loginId="+ loginId +", lec_no=" + lec_no + ", lecDel_yn=" + lecDel_yn + ", max_no="
+					+ max_no + ", upd_date=" + upd_date + ", upd_user=" + upd_user + ", enr_date="
+					+ enr_date + ", enr_user=" + enr_user + ", lec_prof=" + lec_prof + ",  lec_end="
+					+  lec_end + ", lec_start=" + lec_start + ", flec_endtime=" + lec_endtime + ",  lec_starttime="
+					+ lec_starttime + ", lec_goal=" + lec_goal + ", lec_contents=" + lec_contents + 
+					", enr_user=" + enr_user + ", lec_prof=" + lec_prof + ",  lec_enr="
+					+  lec_enr + ", lec_name=" + lec_name + ", lec_signcnt=" + lec_signcnt + ",   room_no="
+					+  room_no + ", rm_name=" + rm_name + ", file_no=" + file_no + 
+					
+					", file_ext=" + file_ext + ", file_enr_date=" + file_enr_date + ",   file_size="
+					+   file_size + ", file_logic_path=" + file_logic_path + ", file_physic_path=" + file_physic_path + ",   file_name="
+					+  file_name + ", week=" + week + ", week_tmp=" + week_tmp + 
+					"]";
+	 }
+	 
+
+
+}
+	

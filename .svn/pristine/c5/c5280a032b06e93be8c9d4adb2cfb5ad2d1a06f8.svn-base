@@ -1,0 +1,111 @@
+package kr.happyjob.study.rsvrem.model;
+
+public class ReservationModel {
+	
+	private int book_no;
+	private String loginID;
+	private int sturm_no;
+	private int book_per_cnt;
+	private int startTime;
+	private int endTime;
+	private String book_date;
+	private String book_title;
+	private String book_cont;
+	private String name; //예약자이름
+	private String bgcolor; //구현해야할것..
+	//book_start, book_end는 추가하지않음.
+	private String rm_name; //스터디룸이름.
+	private int rm_max; //최대 허용인원수
+	
+	public int getBook_no() {
+		return book_no;
+	}
+	public void setBook_no(int book_no) {
+		this.book_no = book_no;
+	}
+	public String getLoginID() {
+		return loginID;
+	}
+	public void setLoginID(String loginID) {
+		this.loginID = loginID;
+	}
+	public int getSturm_no() {
+		return sturm_no;
+	}
+	public void setSturm_no(int sturm_no) {
+		this.sturm_no = sturm_no;
+	}
+	public int getBook_per_cnt() {
+		return book_per_cnt;
+	}
+	public void setBook_per_cnt(int book_per_cnt) {
+		this.book_per_cnt = book_per_cnt;
+	}
+	public int getStartTime() {
+		return startTime;
+	}
+	public void setStartTime(int startTime) {
+		this.startTime = startTime;
+	}
+	public int getEndTime() {
+		return endTime;
+	}
+	public void setEndTime(int endTime) {
+		this.endTime = endTime;
+	}
+	public String getBook_date() {
+		return book_date;
+	}
+	public void setBook_date(String book_date) {
+		this.book_date = book_date;
+	}
+	public String getBook_title() {
+		return book_title;
+	}
+	public void setBook_title(String book_title) {
+		this.book_title = book_title;
+	}
+	public String getBook_cont() {
+		return book_cont;
+	}
+	public void setBook_cont(String book_cont) {
+		this.book_cont = book_cont;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public String getBgcolor() {
+		return bgcolor;
+	}
+	public void setBgcolor(String bgcolor) {
+		this.bgcolor = bgcolor;
+	}
+	
+	public String getRm_name() {
+		return rm_name;
+	}
+	public void setRm_name(String rm_name) {
+		this.rm_name = rm_name;
+	}
+	public int getRm_max() {
+		return rm_max;
+	}
+	public void setRm_max(int rm_max) {
+		this.rm_max = rm_max;
+	}
+	@Override
+	public String toString() {
+		return "ReservationModel [book_no=" + book_no + ", loginID=" + loginID + ", sturm_no=" + sturm_no
+				+ ", book_per_cnt=" + book_per_cnt + ", startTime=" + startTime + ", endTime=" + endTime
+				+ ", book_date=" + book_date + ", book_title=" + book_title + ", book_cont=" + book_cont + ", name="
+				+ name + ", bgcolor=" + bgcolor + ", rm_name=" + rm_name + ", rm_max=" + rm_max + "]";
+	}
+
+
+
+	
+
+}

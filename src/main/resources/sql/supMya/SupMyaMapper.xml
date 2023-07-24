@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.supMya.dao.SupMyaDao">
+
+	<!--  목록 조회 -->
+	<select id="myLecturelist" resultType="kr.happyjob.study.supMya.model.EnrollModel">
+        select rq.lec_no
+              ,rq.tot_score
+              
+              ,ui.loginID
+              ,ui.name
+              
+              ,A.lec_prof
+              ,A.lec_name
+              ,A.name as prof_name
+              ,CONCAT(DATE_FORMAT(A.lec_start, '%Y.%m.%d.'), ' - ', DATE_FORMAT(A.lec_end, '%Y.%m.%d.')) as lec_period
+    		  ,case when rq.drop_yn = '0' then '과락'
+    		  		when rq.drop_yn = '1' then '수료'
+                    else ''
+              end as drop_yn
+
+              ,case when rq.acc_yn = 'P' then '승인대기'
+                    when rq.acc_yn = 'Y' then '승인'
+                    when rq.acc_yn = 'C' then '수강 취소'
+                    else '반려'
+              end as acc_yn
+
+              ,rq.acc_yn acc_yn_code
+          	
+          from tb_request_list rq
+     left join tb_userinfo ui on ui.loginID = rq.loginID
+    inner join ( select lc.lec_prof 
+               						,us.name 
+               						,lc.lec_name 
+               						,lc.lec_no
+               						,lc.lec_start
+               						,lc.lec_end
+						  	from tb_lecture lc
+						  	inner join tb_userinfo us on us.loginID = lc.lec_prof) A on A.lec_no = rq.lec_no
+						  <!--Sub-query로 원하는 데이터를 미리 뽑아서 다시 넣어줌  -->     
+		<where>
+		<if test="(acc_yn != null) and (!acc_yn.equals(''))">
+		    and rq.acc_yn = #{acc_yn}
+		</if>
+		
+		<if test="value eq 'approval'.toString()">
+			and rq.acc_yn = 'Y'
+		</if>
+		<if test="value eq 'pending'.toString()">
+			and rq.acc_yn = 'P'
+		</if>
+		<if test="value eq 'disapproval'.toString()">
+			and rq.acc_yn = 'N'
+		</if>
+		<if test="value eq 'cancel'.toString()">
+			and rq.acc_yn = 'C'
+		</if>
+		<if test="value eq 'total'.toString()">
+			and (rq.acc_yn != '' and rq.acc_yn != '')
+		</if>
+		
+		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'name'.toString()">
+						and A.lec_name LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						and A.lec_name LIKE CONCAT('%', #{sname}, '%')
+					</otherwise>
+				</choose>
+			</if>	
+			<if test="(loginid != null) and (!loginid.equals(''))">
+			    and ui.loginID = #{loginid}
+			</if>
+			
+		</where>
+		ORDER BY lec_period DESC, A.lec_name ASC
+		LIMIT #{pageindex}, #{pageSize}
+	</select>
+
+
+
+
+	<!-- 목록 총 갯수 조회 -->
+	<select id="countmyLecturelist" resultType="int">
+		select count(*)
+          from tb_request_list rq
+               left join tb_userinfo ui on ui.loginID = rq.loginID
+               left join tb_lecture lc on lc.lec_no = rq.lec_no   
+               
+        <where>
+		<if test="(acc_yn != null) and (!acc_yn.equals(''))">
+		    and rq.acc_yn = #{acc_yn}
+		</if>
+		
+		<if test="value eq 'approval'.toString()">
+			and rq.acc_yn = 'Y'
+		</if>
+		<if test="value eq 'pending'.toString()">
+			and rq.acc_yn = 'P'
+		</if>
+		<if test="value eq 'disapproval'.toString()">
+			and rq.acc_yn = 'N'
+		</if>
+		<if test="value eq 'cancel'.toString()">
+			and rq.acc_yn = 'C'
+		</if>
+		<if test="value eq 'total'.toString()">
+			and (rq.acc_yn != '' and rq.acc_yn != '')
+		</if>
+		
+		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'name'.toString()">
+						and lc.lec_name LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						and lc.lec_name LIKE CONCAT('%', #{sname}, '%')
+					</otherwise>
+				</choose>
+			</if>	
+			<if test="(loginid != null) and (!loginid.equals(''))">
+			    and ui.loginID = #{loginid}
+			</if>
+			
+		</where>
+	</select>
+	
+
+	
+	<!-- 강의 수강 취소 -->
+	<update id="cancelmylecture">
+	    update tb_request_list rq
+	       set rq.acc_yn =  #{acc_yn}
+	     where rq.lec_no =  #{lec_no} 
+	       and rq.loginID = #{loginID}
+	</update>
+	
+		<!-- 강의 수강 취소 -->
+	<update id="applymylecture">
+	    update tb_request_list rq
+	       set rq.acc_yn =  #{acc_yn}
+	     where rq.lec_no =  #{lec_no} 
+	       and rq.loginID = #{loginID}
+	</update>
+
+
+</mapper>

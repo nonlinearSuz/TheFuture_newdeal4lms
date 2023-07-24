@@ -1,0 +1,443 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>					
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+			<!-- 관리자로 접속할 경우 밖으로 나가라.. -->
+		<c:choose>
+			<c:when test="${sessionScope.userType == 'M'}">
+						  <c:redirect url="/dashboard/dashboard.do"/>
+			</c:when>	
+		</c:choose>
+		<!-- 주석!! -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>학습자료</title>
+
+
+<jsp:include page="/WEB-INF/view/common/common_include.jsp"></jsp:include>
+
+</head>
+<body>
+<script type="text/javascript">
+
+
+//페이징 설정
+var pageSize = 10; //한페이지당 몇개씩 보여줄래
+var pageBlockSize= 5; //페이지번호갯수 몇개까지 보여줄래 (page navigation번호)
+
+var searcharea;
+var gridlist;	
+var layer1;
+	
+	/** OnLoad event */ //html만 뿌려놓은상태
+	$(function() {
+		
+		 vueinit();
+		 
+		 fn_setSelectBox();
+		 
+		 fn_studyFileList();
+		 
+		 fRegisterButtonClickEvent();
+	
+	});
+
+	function fRegisterButtonClickEvent() {
+		$('a[name=btn]').click(function(e) { 
+			e.preventDefault(); 
+			
+			var btnId = $(this).attr('id');
+			
+			
+			switch (btnId) {
+				case 'btnSave' :
+					fn_save();
+					break;
+				case 'btnDelete' :
+					$("#action").val("D");
+					fn_save();
+					break;
+				case 'btnDeleteFile':
+					$("#action").val("D");
+					fn_savefile();
+					break;
+				case 'btnUpdateFile':
+					$("#action").val("U");
+					fn_savefile();
+					break;	
+				case 'btnSaveFile' :
+					fn_savefile();
+					break;
+				case 'btnDeleteDtlCod' :
+					fDeleteDtlCod();
+					break;
+				case 'btnSearch':
+					fn_studyFileList();
+					break;
+				case 'btnClose' :
+				case 'btnCloseFile' :
+					gfCloseModal();
+					break;
+			}
+		});
+	}	
+	
+	function vueinit() {
+		
+		searcharea = new Vue({
+			                el : "#conTitle",
+			           data : {
+			        	   leclist : ""
+			           }      
+		});
+		
+		
+		gridlist = new Vue({
+			                el : "#studyfileList",
+			             data : {
+			            	        listitem : [],
+			                        pagenavi : "",
+			                        pageno:0
+			             },
+			             methods : {
+			            	 fn_selectonefile:function(study_file_no, lec_no) {
+			            		 alert("fn_selectonefile study_file_no lec_no : " + study_file_no + " : " + lec_no);
+			            		 
+			            		 fn_selectonefile(study_file_no, lec_no);
+			            		 
+			            	 }
+			             }
+		});
+		
+		layer1 = new Vue({
+			               el : "#layer1",
+			           data : {
+			        	          lecselect : "",
+			        	          study_file_title : "",
+			        	          enr_date : "",
+			        	          study_file_cont : "",
+			        	          upfile : "",
+			        	          saveflag : false,
+			        	          modflag : false,
+			        	          delflag : false,
+			              } 
+		});
+		
+		
+	}
+
+	function fn_studyFileList(pageNum){
+			
+			pageNum = pageNum || 1; //undefined 이면 1값을 세팅해라.
+			
+
+			
+		//	alert('실행 되었습니다.fn_studyFileList');
+
+		//	alert('검색 optionvalue값: ' + $("#leclist").val()); //1
+			var search_lec_no = searcharea.leclist;
+
+			
+			var param = {
+					lec_no : search_lec_no	
+				  , pageSize : pageSize
+				  , pageBlockSize : pageBlockSize
+				  , pageNum : pageNum
+				}
+		
+			
+			
+			//callback 함수만들자. 함수형 변수  리턴받을 변수이름?
+			var listcallback = function(returnvalue){
+				//컨트롤러에서 리턴받는 데이터 (listgrd.jsp --> list.jsp)
+				console.log('list함수 실행하고 컨트롤러에서 컬백받는 value :'+JSON.stringify(returnvalue)   );
+				
+				gridlist.listitem =  returnvalue.stufileSearchList;
+				
+				var totalCnt =  returnvalue.totalCnt;
+				console.log("totalCnt: "+ totalCnt);											
+					
+				//페이지 네비게이션 getPaginationHtml 공통함수
+				var paginationHtml = getPaginationHtml(pageNum, totalCnt, pageSize, pageBlockSize, 'fn_studyFileList');
+				console.log("paginationHtml : " + paginationHtml);
+				
+				gridlist.pagenavi = paginationHtml;
+				
+				gridlist.pageno = pageNum; //현재보고있는 currentpage = pagenum			
+				
+			}
+			
+			//    컨트롤러  함수 만들기...
+			callAjax("/supmtr/studyfilelistvue.do", "post", "json", false, param, listcallback);
+			
+			
+   }
+	
+	function fn_setSelectBox(){
+		//이미 세션에 user_id가있음, user_id가 가르치는 lec_no, lec_name을 가져오면된다.
+		//alert('실행 되었습니다.fn_setSelectBox 설정하기');
+		
+		var param = {}
+		//넘길값도 없다?? 이미세션에 id가있음;
+		var selectcallback = function(returnvalue){
+			
+			console.log('select함수 실행하고 컨트롤러에서 컬백받는 value :'+ returnvalue);
+			//앞으로 추가해줘야함 option에 넣을것들;;
+			
+
+			//tbody 영역 
+			$("#leclist").empty().append(returnvalue);
+			$("#lecselect").empty().append(returnvalue);
+			
+		}
+		
+		
+		callAjax("/supmtr/selectList.do", "post", "text", false, param, selectcallback);
+		
+
+	}
+	
+	function fn_openpopupfile() {
+		
+		fn_popupinit();
+		
+		gfModalPop("#layer1");
+	}
+	
+	function fn_popupinit(object) {
+		
+		if(object == "" || object == null || object == undefined) {
+			layer1.lecselect = "";
+			layer1.study_file_title = "";
+			layer1.enr_date = "";
+			layer1.study_file_cont = "";
+			layer1.upfile = "";
+			
+			layer1.saveflag = true;
+			layer1.modflag = false;
+			layer1.delflag = false;
+		} else {
+			layer1.lecselect = object.lec_no;
+			layer1.study_file_title = object.study_file_title;
+			layer1.enr_date = object.enr_date;
+			layer1.study_file_cont = object.study_file_cont;
+			layer1.upfile = "";
+			
+			layer1.saveflag = false;
+			layer1.modflag = true;
+			layer1.delflag = true;
+		}
+		
+		//  {"stufileSearch":{"loginID":null,"lec_no":18,"lec_name":"지금 당장 NestJS 백엔드 개발","lec_prof":null,"study_file_no":1,"file_no":0,"study_file_title":"dfd","study_file_cont":"fgfg","enr_user":"kimCoach","enr_date":"2023-07-14","file_name":null,"file_logic_path":null,"file_physic_path":null,"file_size":0,"file_ext":null}}	
+		
+	}
+	
+	function fn_selectonefile(study_file_no, lec_no) {
+		 var param = {
+					study_file_no : study_file_no
+					,lec_no : lec_no
+				 }
+				 
+				 var selectoncallback = function(returndata){
+						console.log( JSON.stringify(returndata) );
+						
+						fn_popupinit(returndata.stufileSearch);
+						// 모달 팝업
+						gfModalPop("#layer1");
+					 
+				 }
+				 
+				 callAjax("/supmtr/studyfileSelectOne.do", "post", "json", false, param, selectoncallback);
+					//목록 text타입리턴타입 //나머지는 json리턴타입
+	}
+	
+	
+</script>
+
+
+
+<form id="myForm" action=""  method="">
+
+	<input type="hidden" id="action" name="action" />
+    <input type="hidden" id="study_file_no"  name="study_file_no"  />
+    <input type="hidden" id="lec_no" name="lec_no"/> <!-- select box도 form데이터할때 같이 넘어간다. -->
+	<input type="hidden" id="pageno"  name="pageno"  />
+ <!-- 목록조회할떄 현재보고있는 페이지번호 -->
+
+	<!-- 모달 배경 -->
+	<div id="mask"></div>
+
+	<div id="wrap_area">
+
+		<h2 class="hidden">header 영역</h2>
+		<jsp:include page="/WEB-INF/view/common/header.jsp"></jsp:include>
+
+		<h2 class="hidden">컨텐츠 영역</h2>
+		<div id="container">
+			<ul>
+				<li class="lnb">
+					<!-- lnb 영역 --> <jsp:include
+						page="/WEB-INF/view/common/lnbMenu.jsp"></jsp:include> <!--// lnb 영역 -->
+				</li>
+				<li class="contents">
+					<!-- contents -->
+					<h3 class="hidden">contents 영역</h3> <!-- content -->
+					<div class="content">
+
+						<p class="Location">
+							<a href="../dashboard/dashboard.do" class="btn_set home">메인으로</a> <span
+								class="btn_nav bold">학습관리</span> <span class="btn_nav bold">학습자료
+								</span> <a href="../system/comnCodMgr.do" class="btn_set refresh">새로고침★</a>
+						</p>
+				
+						<p id="conTitle" class="conTitle">
+							
+	
+							
+							<span>학습 자료</span> <span class="fr">
+													
+			
+							 <select id="leclist" name="leclist" style="width: 150px;" v-model="leclist">						
+						    		<option value="" >전체</option>				    									
+							</select> 
+							
+	                           <a href="" class="btnType blue" id="btnSearch" name="btn"><span>검  색</span></a>
+							<!-- 선생님일 경우에만 학습자료 등록가능 -->
+							<c:choose>
+    					<c:when test="${sessionScope.userType=='T'}">
+        					 <a	 class="btnType blue" href="javascript:fn_openpopupfile();" name="modal"><span>학습 자료 등록 </span></a>
+					
+  						  </c:when>
+							</c:choose>
+						
+							</span>
+						</p>
+			
+						<div id="studyfileList"  class="studyfileList">	
+							<table class="col">
+								<caption>스터디파일목록</caption>
+								<colgroup>
+									<col width="15%">
+									<col width="10%">
+									<col width="45%">
+									<col width="30%">							
+								</colgroup>
+	
+								<thead>
+									<tr>
+										<th scope="col">과정명</th>
+										<th scope="col">글번호</th>
+										<th scope="col">제목</th>
+										<th scope="col">등록일</th>						
+									</tr>
+								</thead>
+								<tbody id="liststudyfile">
+								       <template v-for="(list,index) in listitem"  v-if="listitem.length">
+                                           <tr>
+										        <td>{{ list.lec_name }}</td>									
+										        <td>{{ list.study_file_no }}</td>
+										        <td @click="fn_selectonefile(list.study_file_no,list.lec_no)" >{{ list.study_file_title }}</td>
+										        <td>{{ list.enr_date }}</td>
+									      </tr>	
+								       </template>
+								</tbody>
+							</table>
+							<div class="paging_area"  id="noticePagination"  v-html="pagenavi"> </div>
+						</div>
+						
+						<table style="margin-top: 10px" width="100%" cellpadding="5" cellspacing="0" border="1"
+                        align="left"
+                        style="collapse; border: 1px #50bcdf;">
+                        <tr style="border: 0px; border-color: blue">
+                           <td width="80" height="25" style="font-size: 120%;">&nbsp;&nbsp;</td>
+                           <td width="50" height="25" style="font-size: 100%; text-align:left; padding-right:25px;">
+     	                  
+     	                     
+                           </td> 
+                           
+                        </tr>
+                     </table> 
+                     
+					</div> <!--// content -->
+
+					<h3 class="hidden">풋터 영역</h3>
+						<jsp:include page="/WEB-INF/view/common/footer.jsp"></jsp:include>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+	<div id="layer1" class="layerPop layerType2" style="width: 600px;">
+		<dl>
+			<dt>
+				<strong>학습 자료 </strong>
+			</dt>
+			<dd class="content">
+
+				<!-- s : 여기에 내용입력 -->
+
+				<table class="row">
+					<caption>caption</caption>
+					<colgroup>
+						<col width="120px">
+						<col width="*">
+						<col width="120px">
+						<col width="*">
+					</colgroup>
+
+					<tbody>
+						<tr>
+						<th scope="row">과정명 <span class="font_red">*</span></th>
+							<td colspan="3"><select id="lecselect" name="lecselect" v-model="lecselect"></select></select></td>						
+						</tr>
+						<tr>
+							<th scope="row">제목 <span class="font_red">*</span></th>
+							<td colspan="1.5"><input type="text" class="inputTxt p100"
+								name="study_file_title" id="study_file_title" v-model="study_file_title" /></td>
+							<th scope="row">등록일자 </th>
+							<td colspan="1.5"><input type="text" class="inputTxt p100"
+								name="enr_date" id="enr_date" v-model="enr_date" disabled/></td>
+						</tr>
+						<tr>
+							<th scope="row">자료 내용 <span class="font_red">*</span></th>
+							<td colspan="3"><input type="text" class="inputTxt p100"
+								name="study_file_cont" id="study_file_cont" v-model="study_file_cont" /></td>					
+						</tr>
+						<tr>
+							<th scope="row">파일업로드 <span class="font_red">*</span></th>
+							<td  colspan="3"><input type="file" class="inputTxt p100"
+								name="upfile" id="upfile"  v-model="upfile" onchange="javascript:preview(event)" /></td>	
+						
+						</tr>
+						<tr>
+							<td colspan="4">
+							<div id="previewdiv" ></div>
+							</td> <!-- 이미지가있으면 미리보게하고, 파일업로드시 표시가능, 다운로드도 가능하게한다. -->				
+						</tr>
+				
+				
+					</tbody>
+				</table>
+
+				<!-- e : 여기에 내용입력 -->
+
+				<div class="btn_areaC mt30">
+					<a href="" class="btnType blue" id="btnSaveFile"  v-show="saveflag" name="btn"><span>저장</span></a>
+					<a href="" class="btnType blue" id="btnUpdateFile" v-show="modflag" name="btn"><span>수정</span></a>
+					<a href="" class="btnType blue" id="btnDeleteFile" v-show="delflag" name="btn"><span>삭제</span></a>  
+					<a href="" class="btnType gray" id="btnCloseFile" name="btn"><span>취소</span></a>
+				</div>
+			</dd>
+		</dl>
+		<a href="" class="closePop"><span class="hidden">닫기</span></a>
+	</div>
+	<!--// 모달팝업 -->
+</form>
+
+
+
+</body>
+</html>

@@ -1,0 +1,431 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>시험응시</title>
+<jsp:include page="/WEB-INF/view/common/common_include.jsp"></jsp:include>
+
+<script type="text/javascript">
+
+	// 페이징 설정
+	var pageSize = 10;     
+	var pageBlockSize = 5;    
+	
+	
+	
+	/** OnLoad event */ 
+	$(function() {
+
+		fRegisterButtonClickEvent();
+		
+		fn_examlist();
+		
+		
+	});
+	
+
+	/** 버튼 이벤트 등록 */
+
+	function fRegisterButtonClickEvent() {
+		$('a[name=btn]').click(function(e) {
+			e.preventDefault();
+
+			var btnId = $(this).attr('id');
+
+			switch (btnId) {
+				case 'btnSearch' :
+					fn_examlist();
+					break;
+				case 'btnSave' :
+					fn_saveTest();
+					break;	
+				case 'btnClose' :
+					gfCloseModal();
+					break;
+			}
+		});
+	}
+	
+	
+	// 시험목록 조회 목록 
+	
+	
+	function fn_examlist(pagenum) {
+		
+		pagenum = pagenum || 1;
+		
+		var param = {
+
+		    pageSize : pageSize
+		  , pageBlockSize : pageBlockSize
+		  , pagenum : pagenum
+		}
+		
+		var listcollabck = function(returnvalue) {
+			console.log(returnvalue);
+			
+			$("#listTest").empty().append(returnvalue);
+			
+			var  totalcnt = $("#totalcnt").val();
+			
+			console.log("totalcnt : " + totalcnt);
+			
+			var paginationHtml = getPaginationHtml(pagenum, totalcnt, pageSize, pageBlockSize, 'fn_examlist');
+			console.log("paginationHtml : " + paginationHtml);
+			 
+			$("#testPagination").empty().append( paginationHtml );
+			
+			$("#pageno").val(pagenum);
+		}
+		
+		callAjax("/exmaex/attendtestlist.do", "post", "text", false, param, listcollabck) ;
+			
+	}
+	
+	
+
+
+	// 시험응시 팝업
+	
+	function fn_applyTest(test_no, lec_no){
+		
+		
+		if(confirm("시험에 응시하겠습니까?")){
+			
+			$("#action").val("I");	
+			
+			gfModalPop("#testPopup");
+		}
+		
+		
+		param = {
+				test_no : test_no,
+				lec_no : lec_no 			
+				};
+			
+		
+		var resultCallback = function(data) {
+			
+			
+			$("#lec_no").val(lec_no);
+			
+			$("#testExamForm").empty();
+			
+			var $data = $( $(data).html() );
+			
+			console.log(data);
+			
+			
+			// 신규 목록 생성
+			var $testExamForm = $data.find("#testExamForm");		
+			
+			$("#testExamForm").append($testExamForm.children());
+
+		}
+
+		
+		callAjax("/exmaex/applytest.do", "post", "text", false, param, resultCallback);
+	}
+	
+
+
+	
+
+//시험 제출 저장
+	
+	function fn_saveTest() {
+	
+	     
+	
+	      var applytestcnt = $("#applytestcnt").val();
+	      var qlist = $("#qlist").val();
+	      var qlistarr = qlist.split(",");
+	      
+	       	      
+	      for(var i=0;i<applytestcnt;i++) {	    	  
+	    	  //alert($('input:radio[name=test'+(i+1) +']').is(":checked"));
+	          //alert(qlistarr[i] + " : " +    $('input[name=test'+qlistarr[i] +']:checked').val() );  
+	  
+	  	      if($('input:radio[name=test'+ qlistarr[i] +']').is(":checked")) {
+	    	  } else {
+	    		  alert((i+1) + "번 문제 답을 선택해 주세요");
+	    		  return;
+	    	  }	    	   
+	      }
+	      
+		 var param = {
+						action : $("#action").val(),
+						lec_no : $("#lec_no").val(),
+						que_no :$("#que_no").val(),
+						user_id :$("#loginId").val(),
+						res_ans :$("#res_ans").val(),
+						res_regdate :$("#res_regdate").val()				
+			}
+		 
+
+			var savecollback = function(reval) {
+					console.log( JSON.stringify(reval));
+					
+						$("#lec_no").val(lec_no);
+					
+							if(reval.submit > 0) {
+								alert("제출이 완료되었습니다.");
+								
+								gfCloseModal();
+					
+							}  else {
+								alert("오류가 발생 되었습니다.");				
+							}
+			}
+					
+			 callAjax("/exmaex/testsubmit.do", "post", "json", false, $("#testSubmitForm").serialize() , savecollback) ;	
+	
+			fn_examlist(); 
+			 
+}
+																				
+
+	
+	
+
+	// 시험결과 팝업
+	
+	function fn_resultTest(lec_no){
+	
+			gfModalPop("#testResult");
+		
+		var param = {	
+						lec_no : lec_no
+						
+							 }
+		
+	
+			var resultCallback = function(data) {
+		
+				$("#testResultForm").empty();
+					
+				
+				var $data = $( $(data).html() );
+				
+				console.log(data);
+				
+				
+				// 신규 목록 생성
+				var $testResultque = $data.find("#testResultque");		
+				
+				$("#testResultForm").append($testResultque.children());
+		
+			}
+			
+			callAjax("/exmaex/resultTest.do", "post", "text", false, param, resultCallback);
+			
+		}
+	
+
+
+
+	
+	
+</script>
+
+</head>
+<body>
+<form id="testSubmitForm" action=""  method="">
+	<input type="hidden" id="action"  name="action"  />
+	<input type="hidden" id="test_no"  name="test_no"  />
+	<input type="hidden" id="lec_no"  name="lec_no"  />
+	<input type="hidden" id="pageno"  name="pageno"  />
+	
+	<!-- 모달 배경 -->
+	<div id="mask"></div>
+
+	<div id="wrap_area">
+
+		<h2 class="hidden">header 영역</h2>
+		<jsp:include page="/WEB-INF/view/common/header.jsp"></jsp:include>
+
+		<h2 class="hidden">컨텐츠 영역</h2>
+		<div id="container">
+			<ul>
+				<li class="lnb">
+					<!-- lnb 영역 --> <jsp:include
+						page="/WEB-INF/view/common/lnbMenu.jsp"></jsp:include> <!--// lnb 영역 -->
+				</li>
+				<li class="contents">
+					<!-- contents -->
+					<h3 class="hidden">contents 영역</h3> <!-- content -->
+					<div class="content">
+
+					<p class="Location">
+							<a href="../dashboard/dashboard.do" class="btn_set home">메인으로</a> <span
+								class="btn_nav bold">성적관리</span> <span class="btn_nav bold">시험응시</span>
+								<a href="../system/comnCodMgr.do" class="btn_set refresh">새로고침</a>
+						</p>
+
+
+						<p class="conTitle">
+							<span>시험 목록</span> <span class="fr">
+					
+							</span>
+						</p>
+						
+						<div class="noticeList">
+							<table class="col">
+								<caption>caption</caption>
+								<colgroup>
+                                                <col width="20%">
+                                                <col width="20%">
+                                                <col width="15%">
+                                                <col width="15%">
+                                                <col width="15%">
+                                                <col width="15%">
+								</colgroup>
+	
+								<thead>
+								
+									<tr>
+	                            			 <th scope="col">강의명</th>
+	                            			 <th scope="col">시험명</th>
+                                             <th scope="col">시험시작일</th>
+                                             <th scope="col">시험종료일</th>
+                                             <th scope="col">시험응시</th>
+                                             <th scope="col">결과</th>
+									</tr>
+								</thead>
+								<tbody id="listTest"></tbody>
+							</table>
+						</div>
+	
+						<div class="paging_area"  id="testPagination"> </div>
+						
+                     
+					</div> <!--// content -->
+
+
+					<h3 class="hidden">풋터 영역</h3>
+						<jsp:include page="/WEB-INF/view/common/footer.jsp"></jsp:include>
+				</li>
+			</ul>
+		</div>
+	</div>
+
+
+
+
+	<!-- 	시험응시 팝업창 모달팝업 -->
+
+	 <div id="testPopup" class="layerPop layerType2" style="width:800px;">
+                    <dl>
+                        <dt>
+				<strong>시험 응시</strong>
+			</dt>
+                        <dd class="content">
+                            <!-- s : 여기에 내용입력 -->
+                      <div class="sidescroll" style="height: 700px; overflow: auto !important">
+              				<table class="row">
+									<caption>caption</caption>
+									<colgroup>
+										<col width="80px">
+										<col width="*">
+										<col width="80px">
+										<col width="*">
+									</colgroup>
+								
+									<tbody id="testExamForm">
+										<tr>
+											<th scope="row">시험명</th>
+											<td colspan="3"></td>
+										</tr>
+										<tr>
+											<th scope="row">강의명</th>
+											<td></td>
+											<th scope="row">강사명</th>
+											<td></td>
+										</tr>
+										<tr>
+											<th colspan="4">시험문제영역</th>
+										</tr>
+										
+										<!-- 문제 for문 돌릴영역 -->
+										<tr>
+										</tr>
+						
+							</tbody>
+						</table>
+				</div>
+                                        
+                            <!-- e : 여기에 내용입력 -->
+
+                            <div class="btn_areaC mt30">
+                                    <a href="" class="btnType blue" id="btnSave" name="btn"><span>제출</span></a>
+                                	<a href="" class="btnType gray" id="btnClose" name="btn"><span>취소</span></a>
+                            </div>
+                        </dd>
+                    </dl>
+                    <a href="" class="closePop"><span class="hidden">닫기</span></a>
+                </div>
+                
+                
+ 	<!-- 	시험 결과 팝업창 모달팝업 -->
+ 	               
+      <div id="testResult" class="layerPop layerType2" style="width:800px;">
+                    <dl>
+                        <dt>
+				<strong>시험 결과</strong>
+			</dt>
+                        <dd class="content">
+                            <!-- s : 여기에 내용입력 -->
+                        <div class="sidescroll" style="height: 700px; overflow: auto !important">
+              				<table class="row">
+									<caption>caption</caption>
+									<colgroup>
+										<col width="100px">
+										<col width="*">
+										<col width="100px">
+										<col width="*">
+									</colgroup>
+								
+									<tbody id="testResultForm">
+											<tr>
+												<th scope="row">시험명</th>
+												<td></td>
+											</tr>
+											<tr>
+												<th scope="row">강의명</th>
+												<td></td>
+												<th scope="row">시험제출일</th>
+												<td></td>
+											</tr>
+											<tr>
+												<th colspan="4">시험 결과 확인</th>
+											</tr>
+											
+											<!-- 문제 for문 돌릴영역 -->
+											<tr>
+											</tr>
+									
+									
+								
+									</tbody>
+					</table>
+				</div>
+                                        
+                            <!-- e : 여기에 내용입력 -->
+
+                            <div class="btn_areaC mt30">
+                                	<a href="" class="btnType gray" id="btnClose" name="btn"><span>확인</span></a>
+                            </div>
+                        </dd>
+                    </dl>
+                    <a href="" class="closePop"><span class="hidden">닫기</span></a>
+                </div>
+
+
+</form>
+</body>
+</html>

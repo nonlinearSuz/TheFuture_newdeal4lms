@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.suplct.dao.SuplctDao">
+
+	<!-- 20230710 17h 08m 커밋용 주석!!! -->
+	<!-- * MyCode [강사] 강의리스트 -->
+	<select id="proflecturelist" resultType="kr.happyjob.study.suplct.model.LectureModel">
+		select lc.lec_name
+	 		  ,lc.lec_no  
+		      ,ui.name as lec_prof
+		      ,date_format(lc.lec_start,'%Y.%m.%d') as lec_start
+		      ,date_format(lc.lec_end,'%Y.%m.%d') as lec_end
+		      ,ifnull(A.cnt,0) as lec_signcnt
+		      ,lc.max_no
+		      ,lc.lecOpen_yn    
+	 	from tb_lecture lc
+	    inner join tb_userinfo ui ON ui.loginID = lc.lec_prof
+	    left outer join (select lec_no, count(*) cnt from tb_request_list WHERE acc_yn NOT IN ('N' ,'C') group by lec_no) A on A.lec_no= lc.lec_no
+ 		
+ 	 <where> 
+	 	 lc.lec_prof=#{loginID} and  lc.lecOpen_yn="Y" and  lc.lecDel_yn="N"
+		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'subject'.toString()">
+						and lc.lec_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<!-- <when
+						test="searchKey eq 'prof_nm'.toString()">
+						and ui.name LIKE CONCAT('%', #{sname}, '%')
+					</when> -->
+					<otherwise>
+						 and (   lc.lec_name Like CONCAT('%', #{sname}, '%')
+						       or ui.name LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>		
+		 </where>	 
+         ORDER BY lc.lec_start DESC
+         LIMIT #{pageindex}, #{pageSize}
+ 	</select> 
+
+	<!-- MyCode [강사] 강의 카운트 리스트(페이지네이션) -->
+   <select id="cntproflecturelist" resultType="int">
+ 	select count(*)
+ 	  from tb_lecture lc
+ 	  inner join tb_userinfo ui ON ui.loginID = lc.lec_prof
+ 	  <where> 
+	 	 lc.lec_prof=#{loginID}  AND   lc.lecOpen_yn="Y" and  lc.lecDel_yn="N"
+		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'subject'.toString()">
+						and lc.lec_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<!-- <when
+						test="searchKey eq 'prof_nm'.toString()">
+						and ui.name LIKE CONCAT('%', #{sname}, '%')
+					</when> -->
+					<otherwise>
+						 and (   lc.lec_name Like CONCAT('%', #{sname}, '%')
+						       or ui.name LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>		
+		 </where>	 
+   </select>
+
+	<!-- * MyCode [학생] 강의리스트 : 강의 개설 승인 받은 강좌만 노출  -->
+	<select id="stulecturelist" resultType="kr.happyjob.study.suplct.model.LectureModel">
+	select concat(lc.lec_name,' (', (
+                                    case when stuleclist.lec_no is null then '미신청'
+                                         else '신청'
+                                    end   
+                                  ),')' ) as lec_name
+ 		  ,lc.lec_no  
+	      ,ui.name as lec_prof
+	      ,date_format(lc.lec_start,'%Y.%m.%d') as lec_start
+	      ,date_format(lc.lec_end,'%Y.%m.%d') as lec_end
+	      ,ifnull(A.cnt,0) as lec_signcnt
+	      ,lc.max_no  
+ 	from tb_lecture lc
+    inner join tb_userinfo ui ON ui.loginID = lc.lec_prof
+    left outer join (select lec_no, count(*) cnt from tb_request_list WHERE acc_yn NOT IN ('N' ,'C') group by lec_no) A on A.lec_no= lc.lec_no
+	  left outer join (select lec_no from tb_request_list WHERE loginID = #{loginID} and acc_yn not like 'C'  ) stuleclist on stuleclist.lec_no= lc.lec_no
+	
+	<where> 
+ 	   lc.lecOpen_yn ="Y"
+		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'subject'.toString()">
+						and lc.lec_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<when
+						test="searchKey eq 'prof_nm'.toString()">
+						and ui.name LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						 and (   lc.lec_name Like CONCAT('%', #{sname}, '%')
+						       or ui.name LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>		 
+		 </where>	<!-- (추후 추가조건 넣을지 고민중임) AND lec_start > now() -->
+	ORDER BY lc.lec_start DESC
+	LIMIT #{pageindex}, #{pageSize} 
+	</select> 
+	
+	<!-- MyCode [학생] 강의 카운트 리스트(페이지네이션) 강의 개설 승인 받은 강좌만 노출  -->
+	<select id="cntstulecturelist" resultType="int">
+	 select count(*),lc.lec_prof,ui.name
+ 	  from tb_lecture lc
+ 	  inner join tb_userinfo ui ON ui.loginID = lc.lec_prof
+ 	  <where> 
+ 	   lc.lecOpen_yn ="Y"
+		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'subject'.toString()">
+						and lc.lec_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<when
+						test="searchKey eq 'prof_nm'.toString()">
+						and ui.name LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						 and (   lc.lec_name Like CONCAT('%', #{sname}, '%')
+						       or ui.name LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>		 
+		 </where>	
+	</select>
+
+
+	<!--* MyCode [관리자] 강의리스트 : 전체 강좌 노출 : 검색조건 승인여부로 달리 두는게 좋을듯.     -->
+	<select id="maslecturelist" resultType="kr.happyjob.study.suplct.model.LectureModel">
+	select lc.lec_name
+ 		  ,lc.lec_no  
+	      ,ui.name as lec_prof
+	      ,date_format(lc.lec_start,'%Y.%m.%d') as lec_start
+	      ,date_format(lc.lec_end,'%Y.%m.%d') as lec_end
+	      ,ifnull(A.cnt,0) as lec_signcnt
+	      ,lc.max_no 
+	      ,lc.lecOpen_yn 
+	     <!--  ,lc.lecDel_yn -->
+ 	from tb_lecture lc
+    inner join tb_userinfo ui ON ui.loginID = lc.lec_prof
+    left outer join (select lec_no, count(*) cnt from tb_request_list WHERE acc_yn NOT IN ('N' ,'C') group by lec_no) A on A.lec_no= lc.lec_no
+	<where> 
+	   lc.lecDel_yn ="N" and lc.lecOpen_yn ="Y" and ui.lec_yn="Y"
+		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'subject'.toString()">
+						and lc.lec_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<when
+						test="searchKey eq 'prof_nm'.toString()">
+						and ui.name LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						 and (   lc.lec_name Like CONCAT('%', #{sname}, '%')
+						       or ui.name LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>		 
+		 </where>	 
+		 ORDER BY lc.lec_start DESC
+		 LIMIT #{pageindex}, #{pageSize}
+	</select>
+	
+	<!-- MyCode [관리자] 강의 카운트 리스트(페이지네이션) 강의 개설 승인 받은 강좌만 노출  -->
+	<select id="cntlecturelist" resultType="int">
+	 select count(*),ui.name
+ 	   from tb_lecture lc
+       inner join tb_userinfo ui ON ui.loginID = lc.lec_prof
+ 	  <where> 
+	   lc.lecDel_yn ="N" and lc.lecOpen_yn ="Y" and ui.lec_yn="Y"
+		<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when
+						test="searchKey eq 'subject'.toString()">
+						and lc.lec_name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<when
+						test="searchKey eq 'prof_nm'.toString()">
+						and ui.name LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						 and (   lc.lec_name Like CONCAT('%', #{sname}, '%')
+						       or ui.name LIKE CONCAT('%', #{sname}, '%')
+						       )
+					</otherwise>
+				</choose>
+			</if>		 
+		 </where>	
+	</select>
+
+	<!-- [관리자] 학생의 강의 수강 승인 -->
+	<update id="stulecSignInApproveUpdate">
+	  update tb_request_list rq
+	  	 set rq.acc_yn=#{acc_yn} 
+	   where lec_no =  #{lec_no} 
+	</update>
+	
+
+	<!--[강사/관리자 공통] 수강 학생 목록 조회(수강생 정보 레코드) -->
+	<select id="attendeesearchlist" resultType="kr.happyjob.study.suplct.model.AttendeeStuModel">
+		  select rq.loginID
+		        ,ui.name
+		        ,lc.lec_name
+		        ,rq.lec_no
+		        ,ui.user_birth
+		        ,ui.user_hp
+		        ,rq.tot_score
+		        ,rq.acc_yn
+		  from tb_request_list rq
+		       inner join tb_userinfo ui ON ui.loginID = rq.loginID
+		       inner join tb_lecture lc ON lc.lec_no = rq.lec_no
+		  where ( rq.acc_yn != 'C') and  lc.lec_no = #{lec_no}
+		  ORDER BY ui.name 
+			  LIMIT #{pageindex}, #{pageSize}
+	</select>
+ 
+
+	<!--[강사/관리자 공통] 수강 학생 목록 갯수 조회 (수강학생 페이지네이션) --> 
+	 <select id="countattendeelist" resultType="int">
+		  select count(*) 
+		   from tb_request_list rq
+		        inner join tb_userinfo ui ON ui.loginID = rq.loginID
+		        inner join tb_lecture lc ON lc.lec_no = rq.lec_no
+		  where ( rq.acc_yn != 'C')  and   lc.lec_no = #{lec_no}
+	</select>
+
+
+	
+<!-- 강의 하나 선택시  -->
+ <select id="lectureselectone" resultType="kr.happyjob.study.suplct.model.LectureModel">
+  select lc.lec_name
+  		,lc.lec_no
+   	<!-- ,ui.name AS lec_prof  -->
+   	 	 ,lc.lec_prof  
+    <!--  ,rm.rm_name AS room_no  -->
+         ,rm.room_no AS room_no
+         ,rm.rm_name
+	     ,lc.lec_start
+	     ,lc.lec_end
+	     ,lc.max_no
+	     ,date_format(lc.test_start,'%Y-%m-%d') as test_start
+	     ,lc.lec_starttime
+	     ,lc.lec_endtime
+	     ,lc.yoil
+	     ,lc.starttime
+	     ,lc.endtime
+	     ,lc.sv_no
+	     ,lc.test_no
+	     ,ui.user_email
+	     ,ui.user_hp
+	     ,ui.name
+	     ,lc.file_no
+	     ,fi.file_name
+         ,fi.file_logic_path
+         ,fi.file_physic_path
+         ,fi.file_size
+         ,fi.file_ext
+     from tb_lecture lc
+	 inner join tb_userinfo ui ON ui.loginID =  lc.lec_prof 
+	 inner join tb_room rm ON rm.room_no = lc.room_no
+	 left outer join tb_files fi ON  fi.file_no = lc.file_no 
+	 where lc.lec_no =  #{lec_no} and lc.lecOpen_yn = "Y" 
+	</select> 
+	
+	<select id="lectureDtselectone" resultType="kr.happyjob.study.suplct.model.LectureModel">
+	  select lc.lec_name
+	  		,lc.lec_no
+	   	<!-- ,ui.name AS lec_prof  -->
+	   	 	 ,lc.lec_prof  
+	    <!--  ,rm.rm_name AS room_no  -->
+	         ,rm.room_no AS room_no
+	         ,rm.rm_name
+	        <!--  ,lc.test_start -->
+	         ,date_format(lc.test_start,'%Y-%m-%d') as test_start 
+		     ,lc.lec_start
+		     ,lc.lec_end
+		     ,lc.lec_goal
+		     ,lc.lec_contents
+		     ,lc.max_no
+		     ,lc.sv_no
+		     ,lc.test_no
+		     ,date_format(lc.lec_starttime,'%H:%i:%s') lec_starttime 
+		     ,date_format(lc.lec_endtime,'%H:%i:%s') lec_endtime
+		     ,lc.yoil
+		     ,lc.starttime
+		     ,lc.endtime
+		     ,ui.user_email
+		     ,ui.user_hp
+		     ,ui.name
+		     ,stuleclist.loginID
+      		,stuleclist.acc_yn
+		     ,lc.file_no
+		     ,fi.file_name
+	         ,fi.file_logic_path
+	         ,fi.file_physic_path
+	         ,fi.file_size
+	         ,fi.file_ext
+	     from tb_lecture lc
+		 inner join tb_userinfo ui ON ui.loginID =  lc.lec_prof 
+		 inner join tb_room rm ON rm.room_no = lc.room_no
+		 left outer join tb_files fi ON  fi.file_no = lc.file_no 
+		 left outer join (select lec_no,loginID,acc_yn from tb_request_list WHERE loginID = #{loginID}) stuleclist on stuleclist.lec_no= lc.lec_no
+	
+		 where lc.lec_no =  #{lec_no} 
+	</select> 
+
+
+
+	<insert id="lectureinsert">
+	    <selectKey resultType="int" keyProperty="no" order="BEFORE">
+            select ifnull(max(lec_no),0) + 1 from tb_lecture
+        </selectKey>   
+	    insert into tb_lecture
+	             (
+	              lec_no
+	              ,lec_name
+			      ,max_no
+			      ,lec_prof
+			      ,enr_user
+			      ,room_no
+			      ,lec_start
+			      ,lec_end
+			      ,file_no
+			      ,lec_enr
+			      ,yoil
+			      ,startTime
+			      ,endTime
+			      ,lec_starttime
+			      ,lec_endtime
+			      ,test_no
+			      ,sv_no
+	             )
+	    values (
+	                #{no} 
+	               ,#{lec_name}
+	               ,#{max_no}
+	               ,#{lec_prof} 
+	               ,#{loginid}
+	               ,#{room_no}
+                   ,#{lec_start}
+                   ,#{lec_end}
+                    <if test="fileexist eq 'N'.toString()">
+                   ,0
+                   </if>
+                   <if test="fileexist eq 'Y'.toString()">
+                   ,(select ifnull(max(file_no),0) from tb_files)
+                   </if>
+                   ,now()  
+                   ,#{checkyoils}
+                   ,#{lec_stime}
+                   ,#{lec_etime}
+                   ,#{lec_starttime}
+                   ,#{lec_endtime}
+                   ,#{test_no}
+                   ,#{sv_no}
+	    )
+	</insert>
+
+	
+	
+	<update id="lectureupdate">
+	    update tb_lecture
+	         set lec_name = #{lec_name} 
+		   		 ,lec_prof = #{lec_prof}  
+		   		 ,room_no = #{room_no}  
+			     ,lec_start = #{lec_start}
+			     ,lec_end = #{lec_end}
+			     ,max_no = #{max_no}
+			     ,yoil = #{checkyoils}
+			     ,startTime = #{lec_stime}
+			     ,endTime = #{lec_etime}
+			     ,lec_starttime = #{lec_starttime}
+			     ,lec_endtime = #{lec_endtime}
+			     ,test_no = #{test_no}
+			     ,sv_no = #{sv_no}
+			     <if test="fileexist eq 'Y'.toString()">
+                , file_no = (select ifnull(max(file_no),0)  from tb_files)
+                </if>
+                <if test="fileexist eq 'N'.toString()">
+                , file_no = 0
+                </if>
+	     where  lec_no =  #{lec_no}  
+	</update>
+
+
+	<update id="lecturedelete">
+	    update tb_lecture
+	         set lec_name = #{lec_name} 
+		   		 ,lec_prof = #{lec_prof}  
+		   		 ,room_no = #{room_no}  
+			     ,lec_start = #{lec_start}
+			     ,lec_end = #{lec_end}
+			     ,max_no = #{max_no}
+			     ,lecDel_yn = "Y"
+			     <if test="fileexist eq 'Y'.toString()">
+                , file_no = (select ifnull(max(file_no),0)  from tb_files)
+                </if>
+                <if test="fileexist eq 'N'.toString()">
+                , file_no = 0
+                </if>
+	     where  lec_no =  #{lec_no}  
+	</update>
+	
+	<update id="lecturedelete_dir">
+	    update tb_lecture
+	         set 
+			     lecDel_yn = #{lecDel_yn}
+	       where  lec_no =  #{lec_no}  
+	</update>
+	
+
+	<insert id="fileinsert">
+	    <selectKey resultType="int" keyProperty="no" order="BEFORE">
+            select ifnull(max(file_no),0) + 1 from tb_files
+        </selectKey>  
+	    insert into tb_files
+	         (
+	             file_no
+               , file_name
+               , file_logic_path
+               , file_physic_path
+               , file_size
+               , file_ext
+               , enr_date
+	         ) values (
+	            #{no}
+	           ,#{filereturn.file_nm}   
+	           ,#{filereturn.vrfile_loc}   
+	           ,#{filereturn.file_loc}   
+	           ,#{filereturn.file_size}   
+	           ,#{filereturn.fileExtension}  
+	           ,#{filereturn.enr_date}
+	         )
+	</insert>
+	
+    <delete id="deletefileinfo">
+	         delete from tb_files
+             where file_no = ( 
+                                       select file_no 
+                                        from tb_lecture
+                                      where lec_no = #{lec_no} 
+                                   )
+	</delete>
+	
+	
+	 <!--  강의 검색 중복 쿼리 작성하기 -->
+	 
+	 <select id="checkSameTime" resultType="int">
+	 	select count(*) as cnt from tb_lecture 
+	 	where lec_start  <![CDATA[<]]>  date_format(#{lec_end},  '%Y-%m-%d')
+		and lec_end  <![CDATA[>]]>   date_format(#{lec_start},  '%Y-%m-%d')
+    
+    	and 
+   		 TIME_FORMAT(lec_starttime, "%H:%i:%s") <![CDATA[<]]> TIME_FORMAT(#{endTime}, "%H:%i:%s")
+		and TIME_FORMAT(lec_endtime, "%H:%i:%s")  <![CDATA[>]]>  TIME_FORMAT(#{startTime}, "%H:%i:%s") 
+		
+		and 
+		
+		
+ 			(
+		    <trim prefixOverrides="OR">
+		      <foreach item="item" collection="yoilArray">
+		          <trim prefix="OR">
+		              yoil like CONCAT('%', #{item}, '%')
+		          </trim>
+		      </foreach>
+		    </trim>
+		)
+
+   		 and room_no = #{room_no}
+	 </select>
+	 
+	 
+	 
+	 	 <!-- 강의중복검색-수정하는경우 -->
+	 <select id="checkSameTimeUpdating" resultType="int">
+	 	select count(*) as cnt from tb_lecture 
+	 	where lec_start  <![CDATA[<]]>  date_format(#{lec_end},  '%Y-%m-%d')
+		and lec_end  <![CDATA[>]]>   date_format(#{lec_start},  '%Y-%m-%d')
+    
+    	and 
+   		 TIME_FORMAT(lec_starttime, "%H:%i:%s") <![CDATA[<]]> TIME_FORMAT(#{endTime}, "%H:%i:%s")
+		and TIME_FORMAT(lec_endtime, "%H:%i:%s")  <![CDATA[>]]>  TIME_FORMAT(#{startTime}, "%H:%i:%s") 
+		
+		and 
+		
+		
+ 			(
+		    <trim prefixOverrides="OR">
+		      <foreach item="item" collection="yoilArray">
+		          <trim prefix="OR">
+		              yoil like CONCAT('%', #{item}, '%')
+		          </trim>
+		      </foreach>
+		    </trim>
+
+		)
+   		
+   		 and room_no = #{room_no} and lec_no not like #{lec_no}
+	 </select>
+	
+	
+	
+	 <!--  수강신청시  중복 쿼리 작성하기 -->
+	 
+	 <select id="checkSameTimetoEnroll" resultType="int">
+	 	select count(*) as cnt from tb_lecture le
+	 	inner join tb_request_list rl on rl.lec_no = le.lec_no	
+	 	where lec_start  <![CDATA[<]]>  date_format(#{lec_end},  '%Y-%m-%d')
+		and lec_end  <![CDATA[>]]>   date_format(#{lec_start},  '%Y-%m-%d')
+    
+    	and 
+   		 TIME_FORMAT(lec_starttime, "%H:%i:%s") <![CDATA[<]]> TIME_FORMAT(#{lec_endtime}, "%H:%i:%s")
+		and TIME_FORMAT(lec_endtime, "%H:%i:%s")  <![CDATA[>]]>  TIME_FORMAT(#{lec_starttime}, "%H:%i:%s") 
+		
+		and 
+		
+		
+ 			(
+		    <trim prefixOverrides="OR">
+		      <foreach item="item" collection="yoilArray">
+		          <trim prefix="OR">
+		              yoil like CONCAT('%', #{item}, '%')
+		          </trim>
+		      </foreach>
+		    </trim>
+		
+		
+		
+		)
+   		
+   		 and rl.loginID = #{loginID}
+   		 and rl.acc_yn not like 'C' and rl.acc_yn not like 'N'
+	 </select>
+	 
+	 <!-- 강의실 선택시  -->
+ <select id="findRoom" resultType="kr.happyjob.study.suplct.model.RoomModel">
+  select * from tb_room where room_no = #{room_no}
+	</select> 
+	
+	
+	<insert id="stuCourseInsert">
+	  
+	    insert into tb_request_list
+	         (
+	            lec_no
+               , loginID
+               , acc_yn
+              
+	         ) values (
+	            #{lec_no}
+	           ,#{loginID}   
+	           , 'P'   
+	          
+	        
+	         )
+	</insert>
+	
+	<select id="checkReEnroll" resultType="int">
+	    select count(*) as  cnt from tb_request_list where  loginID = #{loginID} and lec_no = #{lec_no}
+	</select>
+	
+	<update id="stuCourseUpdate">
+		update tb_request_list rq set rq.acc_yn = 'P' where rq.lec_no = #{lec_no} and rq.loginID = #{loginID} 
+		
+	</update>
+	 
+	
+</mapper>

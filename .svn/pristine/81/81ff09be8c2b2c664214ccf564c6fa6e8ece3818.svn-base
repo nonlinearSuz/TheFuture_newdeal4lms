@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.admstd.dao.AdmStdDao">
+
+	<!--  학생 목록 조회 -->
+	<select id="studentlist" resultType="kr.happyjob.study.admstd.model.StudentModel">
+		<!--kr.happyjob.study.admStd.dao.AdmStdDao.studentlist-->
+		SELECT ui.loginID
+					, ui.name
+					, ui.user_hp
+         		    , ui.user_date
+        		    , ui.user_type,
+					(
+						SELECT COUNT(*) 
+        		       	  FROM tb_request_list rl
+        		        WHERE rl.loginID = ui.loginID AND rl.acc_yn = 'Y'
+       			    ) AS acc_yn
+          FROM tb_userinfo  ui
+		<where>
+			AND ui.user_active = "Y"
+			AND  ui.user_type = "S"
+			<if test="value eq 'approval'.toString()">
+				AND (
+		    		SELECT COUNT(*)
+		 			  FROM tb_request_list rl
+		    		WHERE rl.loginID = ui.loginID AND rl.acc_yn = 'Y'
+				) > 0
+			</if>
+			<if test="value eq 'unapproval'.toString()">
+				AND (
+				    SELECT count(*)
+				     FROM tb_request_list rl
+				   WHERE rl.loginID = ui.loginID AND rl.acc_yn = 'Y'
+				) = 0
+			</if>
+			<if test="(startDate != null) and (!startDate.equals('')) and (endDate != null) and (!endDate.equals(''))">
+				AND user_date between #{startDate} AND #{endDate}
+			</if>
+			<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'name'.toString()">
+						AND ui.name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<when test="searchKey eq 'loginID'.toString()">
+						AND ui.loginID LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						AND (   ui.name LIKE CONCAT('%', #{sname}, '%')
+							       OR ui.loginID LIKE CONCAT('%', #{sname}, '%')
+						 )
+					</otherwise>
+				</choose>
+			</if>		
+		</where>		
+		ORDER BY ui.name 
+		LIMIT #{pageindex}, #{pageSize}
+	</select>
+	
+	<!-- 목록 총 갯수 조회 -->
+	<select id="countstudentlist" resultType="int">
+		<!-- kr.happyjob.study.admStd.dao.AdmStdDao.countstudentlist -->
+		SELECT COUNT(*)
+         FROM tb_userinfo ui
+		<where>
+			AND ui.user_active = "Y"
+			AND ui.user_type = "S"
+			<if test="value eq 'approval'.toString()">
+				AND (
+				    SELECT COUNT(*)
+				      FROM tb_request_list rl
+				    WHERE rl.loginID = ui.loginID AND rl.acc_yn = 'Y'
+				) > 0
+			</if>
+			<if test="value eq 'unapproval'.toString()">
+				AND (
+				    SELECT count(*)
+				      FROM tb_request_list rl
+				    WHERE rl.loginID = ui.loginID AND rl.acc_yn = 'Y'
+				) = 0
+			</if>
+			<if test="(startDate != null) and (!startDate.equals('')) and (endDate != null) and (!endDate.equals(''))">
+				AND user_date BETWEEN #{startDate} AND #{endDate}
+			</if>
+			<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'name'.toString()">
+						AND ui.name Like CONCAT('%', #{sname}, '%')
+					</when>
+					<when test="searchKey eq 'loginID'.toString()">
+						AND ui.loginID LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+						AND (   ui.name LIKE CONCAT('%', #{sname}, '%')
+						       OR ui.loginID LIKE CONCAT('%', #{sname}, '%')
+						)
+					</otherwise>
+				</choose>
+			</if>		
+		</where>		
+	</select>
+	
+	<select id="studentselectone" resultType="kr.happyjob.study.admstd.model.StudentModel">
+        SELECT ui.loginID 
+        			, ui.name
+        			, ui.user_birth
+        		    , ui.user_hp
+        		    , ui.user_gender
+        		    , ui.user_email
+        		    , ui.user_addr
+        		    , ui.user_etc
+          FROM tb_userinfo  ui
+        WHERE ui.loginID = #{loginID}  
+	</select>
+	
+	<select id="studentselectonelec" resultType="kr.happyjob.study.admstd.model.StudentModel">
+		SELECT rl.acc_yn
+					, rl.lec_no
+					, rl.loginID
+					, le.lec_name
+					, le.lec_start
+					, le.lec_end
+		 FROM tb_request_list rl
+			LEFT OUTER JOIN tb_lecture le ON rl.lec_no = le.lec_no
+	   WHERE rl.loginID = #{loginID}  AND rl.acc_yn = 'Y'
+	</select>
+	
+	<!-- 회원정보(비고) 수정 -->
+	<update id="userEtc">
+		UPDATE tb_userinfo
+				SET user_etc = #{userEtc}
+		 WHERE loginID = #{loginID}  
+	</update>
+	
+	<!-- 회원탈퇴 -->
+	<update id="studentWithdrawal">
+		UPDATE	tb_userinfo
+				SET	user_active = 'N' 
+		 WHERE	loginID =  #{loginID}  
+	</update>
+	
+</mapper>

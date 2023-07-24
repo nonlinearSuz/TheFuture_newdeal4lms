@@ -1,0 +1,148 @@
+package kr.happyjob.study.admtbl.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.happyjob.study.admtbl.model.RoomModel;
+import kr.happyjob.study.admtbl.model.TimetableModel;
+import kr.happyjob.study.admtbl.service.AdmtblService;
+import kr.happyjob.study.rsvrem.model.ReservationModel;
+import kr.happyjob.study.rsvrem.model.StudyroomModel;
+
+@Controller
+@RequestMapping("/admtbl/")
+public class AdmtblController {
+
+	   // Set logger
+	   private final Logger logger = LogManager.getLogger(this.getClass());
+
+	   // Get class name for logger
+	   private final String className = this.getClass().toString();
+	   
+	   @Autowired
+	   AdmtblService admtblService;
+	   
+	   /**
+	    * 초기화면
+	    */
+	   @RequestMapping("list.do")
+	   public String list(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+	         HttpServletResponse response, HttpSession session) throws Exception {
+	      
+	      logger.info("+ Start " + className + ".list");
+	      logger.info("   - paramMap : " + paramMap);
+	  
+	      String user_id = (String) session.getAttribute("loginId");
+	      //System.out.println("세션에서 받은 user_id = " + user_id);
+	      
+	      
+	      logger.info("+ End " + className + ".list");
+
+	      return "admtbl/tbllist"; //web-inf/views/noticelist.jsp
+	   }
+		
+	   @RequestMapping("/timetablelist") //하루에 있는 예약목룍록 출력하기
+	   @ResponseBody
+		public Map<String, Object> timetablelist(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+		         HttpServletResponse response, HttpSession session) throws Exception {
+		//	log.info("todaylist post화면호출");
+			
+		      logger.info("+ Start " + className + ".timetablelist");
+		      logger.info("   - paramMap : " + paramMap); 
+			//현재 날짜를 기준으로 데이터를 받아온다.
+			//JS에서 넘겨줄지, Controller에서 설정할지 선택한다.
+			//JS input ajax통신으로 받아온다.
+			//Controller 날짜포맷형식을 받아온다.
+			//일단
+			List<TimetableModel> timeTblLists = admtblService.timeList(paramMap);
+		
+			
+			System.out.println(timeTblLists);
+			for(int i=0; i<timeTblLists.size(); i++){
+				logger.info("===출력====" +(timeTblLists.get(i)));
+				int startTime = timeTblLists.get(i).getStartTime();
+				int endTime = timeTblLists.get(i).getEndTime();
+			}
+			//배열을 넣으면........ js에서는 어떻게가져옴?
+			logger.info("갖고 온 데이터 = " + timeTblLists);
+			 Map<String, Object> returnMap = new HashMap<String, Object>(); //new Map<>(); 로 초기화가 불가능하다??
+			  returnMap.put("timeTblLists", timeTblLists);
+			
+			  logger.info("+ End " + className + ".timetablelist");
+			return returnMap;
+		}
+	   
+	   
+	   @RequestMapping("roomSelectList.do")	  
+	   public String roomSelectList(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+	         HttpServletResponse response, HttpSession session) throws Exception {
+	      
+	      logger.info("+ Start " + className + ".roomSelectList");
+	      logger.info("   - paramMap : " + paramMap); //ajax param
+	      
+
+	      logger.info("selectList이 호출되었다.★★★★★★★★★★★★★★★★★★");
+	     
+	     // controller service dao sql
+	      
+	     paramMap.put("loginID",(String) session.getAttribute("loginId")); //**세션에 넣을떄는 loginId
+	     																	//paramMap에 넣을때는 loginID
+	     logger.info("   - paramMap ????????????????????????: " + paramMap); 
+	     // userType을 체크해서, 만약에 학생이면, --> select * from tb_request_list로, 
+	     //  select * from tb_request_list where loginID = 'stu100' and acc_yn ='Y';
+	     
+	     // acc_yn 승인여부 체크해야함
+	     logger.info("지금 접속한 사람의 유저타입은 = " + session.getAttribute("userType"));
+	     //T, S , M에 따라 분기하면된다.
+	     String userType = session.getAttribute("userType").toString();
+	
+	     
+	     
+	     
+	     List<RoomModel> selectBoxList = admtblService.roomList(paramMap); 
+ 	     logger.info("==========selectBoxList" + selectBoxList);
+ 	     for(RoomModel list : selectBoxList){
+ 	    	 
+ 	    	 logger.info("조회해온 list = " + list);
+ 	     }
+ 	    model.addAttribute("selectBoxList", selectBoxList);
+	     
+	     
+	   
+	    		 
+//	    		 MngNotService mngNotService = new MngNotServiceImpl();
+	    		 //매번만들어줘야함 (상속?)
+	    		 //@Autowired 하면 전역변수로 선언한다.
+	     
+	     //return할 map을 초기화해서 선언한다.
+	     //Map<String, Object> returnMap = new HashMap<String, Object>(); //new Map<>(); 로 초기화가 불가능하다??
+	  
+	     
+	     //returnMap.put("selectBoxList", selectBoxList); //VO 전체제이슨 안에 JSON이 또들어간 형태..
+	     
+	     
+	      logger.info("+ End " + className + ".roomSelectList");
+
+	      return "admtbl/selectboxlist";  
+	      //user/mngNot/noticelistgrd.jsp
+	   }
+	   
+		
+	   
+	   
+}
+	   

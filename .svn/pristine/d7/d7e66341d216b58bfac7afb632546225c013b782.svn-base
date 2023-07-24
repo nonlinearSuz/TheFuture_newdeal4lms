@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 2023-07-11 commit 주석 -->
+<mapper namespace="kr.happyjob.study.cmmqna.dao.CmmQnaDao">
+	<!-- 목록 조회 -->
+	<select id="selectQna" resultType="kr.happyjob.study.cmmqna.model.Qna">
+		select qa.qna_no
+				, qa.qna_title
+				, qa.qna_contents
+				, qa.enr_date
+				, qa.enr_user
+				, qa.qna_cnt
+				, qa.qna_open_yn
+				, qa.pro_id
+				, qa.category_no
+				, qa.qna_pwd
+				,qcg.category_name
+				, ui.name
+				, ui.user_type
+				, ui.loginID
+			from tb_qna qa
+				join	tb_userinfo ui on ui.loginID = qa.enr_user
+				join tb_qna_category qcg on qcg.category_no = qa.category_no
+			<where>
+			<if test = "(category_name != null) and (!category_name.equals(''))">
+				and qcg.category_name = #{category_name}
+			</if>
+				
+			<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'title'.toString() ">
+						and qa.qna_title LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<when test="searchKey eq 'cont'.toString()">
+						and qa.qna_contents LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<when test="searchKey eq 'writer'.toString()">
+			 			and ui.loginID LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+							and ( qa.qna_title LIKE CONCAT('%', #{sname}, '%')
+										or qa.qna_contents LIKE CONCAT('%', #{sname}, '%')
+				 						or ui.loginID LIKE CONCAT('%', #{sname}, '%')
+									)
+					</otherwise>
+					</choose>
+				</if>	
+				<!-- <if test="(sname != null) and (!sname.equals(''))">
+					<choose>
+						<when test="searchKey eq 'title'.toString() ">
+							and qa.qna_title LIKE CONCAT('%', #{sname}, '%')
+						</when>
+						<when test="searchKey eq 'cont'.toString()">
+							and qa.qna_contents LIKE CONCAT('%', #{sname}, '%')
+						</when>
+						<when test="searchKey eq 'writer'.toString()">
+							and ui.loginID LIKE CONCAT('%', #{sname}, '%')
+						</when>
+						<otherwise>
+							and ( qa.qna_title LIKE CONCAT('%', #{sname}, '%')
+								or qa.qna_contents LIKE CONCAT('%', #{sname}, '%')
+								or ui.loginID LIKE CONCAT('%', #{sname}, '%')
+								)
+						</otherwise>
+					</choose>
+				</if> -->
+			</where>
+			ORDER BY qa.enr_date desc
+			LIMIT #{pageindex}, #{pageSize}
+	</select>
+	
+	<!-- 목록 총 갯수 조회 -->
+	<select id="countQnaList" resultType="int">
+		select count(*)
+          from tb_qna qa
+               join tb_userinfo ui on ui.loginID = qa.enr_user
+		<where>
+			<if test = "(category_name != null) and (!category_name.equals(''))">
+				and qcg.category_name = #{category_name}
+			</if>
+				
+			<if test="(sname != null) and (!sname.equals(''))">
+				<choose>
+					<when test="searchKey eq 'title'.toString() ">
+						and qa.qna_title LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<when test="searchKey eq 'cont'.toString()">
+						and qa.qna_contents LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<when test="searchKey eq 'writer'.toString()">
+			 			and ui.loginID LIKE CONCAT('%', #{sname}, '%')
+					</when>
+					<otherwise>
+							and ( qa.qna_title LIKE CONCAT('%', #{sname}, '%')
+										or qa.qna_contents LIKE CONCAT('%', #{sname}, '%')
+				 						or ui.loginID LIKE CONCAT('%', #{sname}, '%')
+									)
+					</otherwise>
+					</choose>
+				</if>	
+				</where>
+	</select>
+	
+	<!-- 하나 조회 -->
+	<select id="detailQnaList" resultType="kr.happyjob.study.cmmqna.model.Qna">
+		select qa.qna_no  
+				, qa.qna_title
+				, qa.qna_contents
+				, qa.enr_date
+				, qa.enr_user
+				, qa.qna_cnt
+				, qa.qna_open_yn
+				, qa.pro_id
+				, qa.category_no
+				, qa.qna_pwd
+				, qcg.category_name
+				, ui.name
+				, ui.user_type
+				, ui.loginID 
+	 	from tb_qna qa
+	 		join tb_userinfo ui on ui.loginID = qa.enr_user
+	 		join tb_qna_category qcg on qcg.category_no = qa.category_no
+		where qcg.category_no = #{category_no}
+			and qa.qna_no = #{qna_no}
+	</select>
+	
+	<!-- 댓글 조회 -->
+	<select id="detailQnaRvList" resultType="kr.happyjob.study.cmmqna.model.QnaReply">
+		select rp.qna_no
+				,	rp.rpy_no
+				,	rp.category_no
+				,	rp.rpy_contents
+				,	rp.enr_user
+				,	rp.enr_date
+				,	rp.upd_user
+				,	rp.upd_date
+				,	ui.name
+				,	ui.user_type
+				,	ui.loginID
+				,	qcg.category_name
+				,	qa.qna_title
+				,	qa.qna_contents
+			from tb_qna_reply rp
+				join tb_userinfo ui on ui.loginId = rp.enr_user
+				left outer join tb_qna qa on qa.qna_no = rp.qna_no
+				join tb_qna_category qcg on qcg.category_no = rp.category_no
+			where rp.qna_no = #{qna_no} and rp.category_no = #{category_no}
+			order by enr_date desc
+	</select>
+	
+	<!-- 댓글 등록 -->
+	<insert id="insertQnaReply">
+		<selectKey resultType="int" keyProperty="no" order="BEFORE">
+			select ifnull(max(rpy_no), 0) +1 from tb_qna_reply
+		</selectKey>
+		insert into tb_qna_reply (
+							qna_no
+						,	rpy_no
+						,	category_no
+						,	enr_user
+						,	enr_date
+						,	rpy_contents
+		)	values (
+						#{qna_no}
+						,	#{no}
+						,	#{category_no}
+						,	#{enr_user}
+						,	now()
+						,	#{rpy_content}
+		)
+	</insert>
+	<!-- 글 등록 -->
+	<insert id="insertQna">
+		<selectKey resultType="int" keyProperty="no" order="BEFORE">
+			select ifnull(max(qna_no), 0) +1 from tb_qna
+		</selectKey>
+		insert into tb_qna (
+						  qna_no
+						, qna_title
+						, qna_contents
+						, category_no
+						, enr_user
+						, enr_date
+				) values (
+							#{no}
+							,#{qna_title}
+							,#{qna_contents}
+							,#{category_no}
+							,#{enr_user}
+							,now()
+					)
+	</insert>
+	
+	<!-- 수정 qna_no를 못 불러오는건 qna_no값을 안가져와서 그런건데 가져오면 무한 리로딩이고 안가져오면 카테고리 번호가 안바뀐다.
+		-->
+	<update id="updateQna">
+		update tb_qna
+			set qna_title = #{qna_title},
+				qna_contents = #{qna_contents}
+			where qna_no = #{qna_no}
+	</update>
+	
+	<update id="updateQnaReply">
+		update tb_qna_reply 
+			set rpy_contents = #{rpy_contents}
+		where rpy_no = #{rpy_no} and qna_no = #{qna_no} and category_no = #{category_no}
+	</update>
+	
+	<delete id="deleteQnaReply">
+		delete from tb_qna_reply
+		where rpy_no = #{rpy_no} and qna_no = #{qna_no} and category_no = #{category_no}
+	</delete>
+	
+	<!-- 삭제 -->
+	<delete id="deleteQna">
+		delete from tb_qna
+		where qna_no = #{qna_no}
+	</delete>
+	
+	<!--  조회수 증가 -->
+	<update id="increaseCount">
+		update tb_qna
+			set qna_cnt = ifnull(qna_cnt, 0) + 1
+		where qna_no = #{qna_no}
+	</update>
+</mapper>

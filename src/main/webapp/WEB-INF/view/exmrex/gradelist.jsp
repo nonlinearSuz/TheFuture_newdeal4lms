@@ -21,38 +21,26 @@
 	$(function() {
 		// 버튼 이벤트 등록
 		fRegisterButtonClickEvent();
-		var cookie_user_id = getCookie('EMP_ID');
-		console.log("확1인 : " + cookie_user_id);
+		//var cookie_user_id = getCookie('EMP_ID');
 		fn_gradelist();
-
 	});
 	
-
-	
 	/** 버튼 이벤트 등록 */
-
 	function fRegisterButtonClickEvent() {
 		$('a[name=btn]').click(function(e) {
-			e.preventDefault();
+			e.preventDefault();	//다른 이벤트 제어
 
 			var btnId = $(this).attr('id');
-			console.log("btnId : " + btnId);
 			switch (btnId) {
 				case 'btnSearch' :
 					filter=null;
 					fn_gradelist();
 					break;
 
-				case 'btnpopClose' :
-				case 'btnClose' :
-				case 'btnCloseFile' :
-					gfCloseModal();
-					break;
 				case 'btnView' :
 					  $("#gradestdlist").empty(); // gradestdlist 요소 초기화
 
 					  var lec_no = $('#lec_no').val();
-					  console.log("lec_no : " + lec_no);
 					  var obj = {
 					    lec_no: lec_no
 					  };
@@ -64,7 +52,6 @@
 					  }
 					  break;
 				case 'btnQuit':
-					//fn_gradelist("", "AccountCancel");
 					break;
 			}
 		});
@@ -93,14 +80,11 @@
 		
 		// 결과 처리 콜백 함수
 			var listcollabck = function(returnvalue) {
-			console.log("확인 : " + returnvalue);
  			$("#gradelist").empty().append(returnvalue);
 			
  			var  totalcnt = $("#totalcnt").val();
-			console.log("totalcnt : " + totalcnt);
 			
 			var paginationHtml = getPaginationHtml(pagenum, totalcnt, pageSize, pageBlockSize, 'fn_gradelist');
-			console.log("paginationHtml : " + paginationHtml);
 			
 			$("#gradePagination").empty().append( paginationHtml );
 			$("#pageno").val(pagenum); 
@@ -118,24 +102,19 @@
 		    pageSize : pageSize						// 페이지당 항목 수
 		  , pageBlockSize : pageBlockSize		// 페이지 블록 단위
 		  , pagenum : pagenum							// 현재 페이지 번호
-		  , lec_no : lec_no											// 필터링 위한 값
+		  , lec_no : lec_no									// 필터링 위한 값
 		} 
 		
 		// 결과 처리 콜백 함수
 		var selectoncallback = function(returnvalue) {
-		console.log("확인 : " + returnvalue);
 		$("#gradestdlist").empty().append(returnvalue);
 		
 		var  totalcnt = $("#totalleccnt").val();
-		console.log("totalleccnt : " + totalcnt);
 		
 		var paginationHtml = getPaginationHtml(pagenum, totalcnt, pageSize, pageBlockSize, 'fn_selectone', [lec_no]);
-		console.log("paginationHtml : " + paginationHtml);
 		
 		$("#gradestdPagination").empty().append( paginationHtml );
 		$("#pagenolec").val(pagenum); 
-		console.log("pagenum : " + pagenum);
-		console.log("pageSize : " + pageSize);
 		
 	}
 		callAjax("/exmrex/gradeselectone.do", "post", "text", true, param, selectoncallback) ;
@@ -215,8 +194,6 @@
 							</table>
 							<div class="paging_area" id="gradePagination"></div>
 						</div>
-						
-
                   		<div style="height: 400px; overflow-y: auto;">
 						<table class="col">
 							<thead>

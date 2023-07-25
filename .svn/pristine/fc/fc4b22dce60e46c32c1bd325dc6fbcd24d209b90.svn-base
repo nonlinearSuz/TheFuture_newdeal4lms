@@ -1,0 +1,174 @@
+package kr.happyjob.study.cmmntc.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import kr.happyjob.study.cmmntc.model.NoticeModel;
+import kr.happyjob.study.cmmntc.model.NoticeReply;
+import kr.happyjob.study.cmmntc.service.CmmNtcService;
+
+@Controller
+@RequestMapping("/cmmntc/")
+public class CmmNtcController {
+	
+	@Autowired
+	CmmNtcService cmmNtcService;
+	
+	private final Logger logger = LogManager.getLogger(this.getClass());
+	private final String className = this.getClass().toString();
+	
+	@RequestMapping("noticeList.do")
+	public String noticeList(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+			HttpServletResponse response, HttpSession session) throws Exception {
+		
+		logger.info(" + Start " + className + ".noticeList");
+		logger.info(" - paramMap : " + paramMap);
+		
+		logger.info(" + End " + className + ".noticeList");
+		
+		return "cmmntc/noticelist";
+	}
+	
+	@RequestMapping("noticelist.do")
+	public String noticelist(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+			HttpServletResponse response, HttpSession session) throws Exception {
+		
+		logger.info("+ Start " + className + ".noticelist");
+		logger.info(" - paramMap: " + paramMap);
+		
+		int pagenum = Integer.parseInt((String) paramMap.get("pagenum"));
+		int pageSize = Integer.parseInt((String) paramMap.get("pageSize"));
+		int pageindex = (pagenum - 1) * pageSize;
+		
+		paramMap.put("pageSize", pageSize);
+		paramMap.put("pageindex", pageindex);
+		
+		List<NoticeModel> noticesearchlist = cmmNtcService.noticelist(paramMap);
+		int totalcnt = cmmNtcService.countnoticelist(paramMap);
+		
+		model.addAttribute("noticesearchlist", noticesearchlist);
+		model.addAttribute("totalcnt", totalcnt);
+		
+		logger.info(" + End " + className + ".noticelist");
+		
+		return "cmmntc/noticelistgrd";
+	}
+	
+	@RequestMapping("noticeselectone.do")
+	public String noticeselectone(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+			HttpServletResponse response, HttpSession session) throws Exception {
+		
+		int nt_no = Integer.parseInt(((String)paramMap.get("nt_no")).trim());
+		
+		logger.info("nt_no  가 잘 들어오고 있는가?---- "+nt_no);
+		logger.info("+ Start " + className + ".noticeselectone");
+		logger.info("- paramMap : " + paramMap);
+		
+		//글 상세조회
+		NoticeModel noticesearch = cmmNtcService.noticeselectone(paramMap);
+		logger.info(" - noticesearch :  ★" + noticesearch);
+		
+		//조회수 증가
+		if(noticesearch != null) {
+			cmmNtcService.updateViewCnt(noticesearch.getNt_no());
+		}
+		
+		//session에서 id가져오기
+		String loginID = (String) session.getAttribute("loginId");
+		model.addAttribute("loginId", loginID);
+		
+		//session에서 name 가져오기
+		String name = (String) session.getAttribute("name");
+		model.addAttribute("name", name);
+		
+		//댓글 조회
+		List<NoticeReply> noticeRvList = cmmNtcService.noticeReply(nt_no);
+		logger.info(" - noticeRvList :  ★" + noticeRvList);
+		
+		model.addAttribute("noticesearch", noticesearch);
+		model.addAttribute("noticeRvList", noticeRvList);
+		model.addAttribute("loginID", loginID );
+		
+		logger.info(" - noticesearch : " + noticesearch);
+		logger.info(" - noticeRvList : " + noticeRvList);
+		logger.info(" + End " + className + ".noticeselectone");
+		
+		return "cmmntc/noticedetailpopup";
+	}
+	
+	@RequestMapping("noticesave.do")
+	@ResponseBody
+	public Map<String, Object> noticeSave(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+			HttpServletResponse response, HttpSession session) throws Exception {
+		
+		logger.info("+ Start " + className + ".noticeSave");
+		logger.info(" - paramMap : " + paramMap);
+		
+		String action = (String) paramMap.get("action");
+		String reaction = (String) paramMap.get("reaction");
+		
+		paramMap.put("loginId", (String) session.getAttribute("loginId"));
+		
+		int returnval = 0;
+		
+		if("I". equals(action)) {
+			returnval = cmmNtcService.insert(paramMap);
+		} else if ("U".equals(action)) {
+			returnval = cmmNtcService.update(paramMap);
+		}
+		else if("D".equals(action)) {
+			returnval = cmmNtcService.delete(paramMap);
+		}
+		
+		Map<String, Object> returnMap = new HashMap<String, Object> ();
+		
+		returnMap.put("returnval", returnval);
+		
+		logger.info("+ End " + className + ".noticeSave");
+		
+		return returnMap;
+	}
+	
+	//댓글 등록
+	@RequestMapping("noticeResave.do")
+	@ResponseBody
+	public Map<String, Object> noticeResave(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+				HttpServletResponse response, HttpSession session) throws Exception {
+		
+		String reaction = (String) paramMap.get("reaction");
+		
+		paramMap.put("loginId", (String) session.getAttribute("loginId"));
+		
+		int returnval = 0;
+		
+		if("I".equals(reaction)) {
+			returnval = cmmNtcService.insertRp(paramMap);
+		} else if ("U".equals(reaction)) {
+			returnval = cmmNtcService.updateRp(paramMap);
+			logger.info(" - returnval  (reaction!!!!!!!!) : " + returnval);
+		} else if ("D".equals(reaction)) {
+			returnval = cmmNtcService.deleteRp(paramMap);
+		}
+		
+		Map<String, Object> returnMap = new HashMap<String, Object> ();
+		returnMap.put("returnval", returnval);
+		logger.info("noticeResave.do paramMap !!  : " + paramMap);
+		logger.info("noticeResave.do returnMap : " + returnMap);
+		return returnMap;
+	}
+
+}

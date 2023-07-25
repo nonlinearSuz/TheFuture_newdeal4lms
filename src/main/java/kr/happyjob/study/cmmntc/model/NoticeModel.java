@@ -1,5 +1,4 @@
 package kr.happyjob.study.cmmntc.model;
-/*2023-07-11 commit 주석*/
 public class NoticeModel {
 	
 	public int getNt_no() {

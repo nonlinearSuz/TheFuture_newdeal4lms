@@ -118,10 +118,7 @@
 			
 			var $data = $( $(data).html() );
 			
-			console.log(data);
-			
-			
-			// 신규 목록 생성
+
 			var $testExamForm = $data.find("#testExamForm");		
 			
 			$("#testExamForm").append($testExamForm.children());
@@ -135,12 +132,16 @@
 
 
 	
+	
+	
+	
+	
+
+	
 
 //시험 제출 저장
 	
 	function fn_saveTest() {
-	
-	     
 	
 	      var applytestcnt = $("#applytestcnt").val();
 	      var qlist = $("#qlist").val();
@@ -148,9 +149,7 @@
 	      
 	       	      
 	      for(var i=0;i<applytestcnt;i++) {	    	  
-	    	  //alert($('input:radio[name=test'+(i+1) +']').is(":checked"));
-	          //alert(qlistarr[i] + " : " +    $('input[name=test'+qlistarr[i] +']:checked').val() );  
-	  
+
 	  	      if($('input:radio[name=test'+ qlistarr[i] +']').is(":checked")) {
 	    	  } else {
 	    		  alert((i+1) + "번 문제 답을 선택해 주세요");
@@ -240,6 +239,7 @@
 	<input type="hidden" id="test_no"  name="test_no"  />
 	<input type="hidden" id="lec_no"  name="lec_no"  />
 	<input type="hidden" id="pageno"  name="pageno"  />
+	<input type="hidden" id="test_start"  name="test_start"  />
 	
 	<!-- 모달 배경 -->
 	<div id="mask"></div>

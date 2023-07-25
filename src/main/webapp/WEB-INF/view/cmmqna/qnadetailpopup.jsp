@@ -2,16 +2,13 @@
     pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>    
-<!-- 2023-07-11 commit!! 주석 -->
-<!-- <div class="hidden"></div> -->
       <dl>
          <dt>
             <strong>Q&A</strong>
          </dt>
          <dd class="content">
-            <!-- s : 여기에 내용입력 -->
             	 <div class="sidescroll" style="height: 400px; overflow: auto !important">
-<table class="row">
+				<table class="row">
 					<caption>caption</caption>
 					<colgroup>
                                  <col width="20%">
@@ -39,7 +36,6 @@
 							<td colspan="2" id="qna_date" >${qnasearch.enr_date }</td>
 						</tr>
 						<tr>
-							
 							<th scope="row">내용</th>
 							<td colspan="2">
 							   <textarea style="border:#e5e5e5;" class="inputTxt p100 qna_contentsTo" id="qna_contentsTo" name="qna_contentsTo">${qnasearch.qna_contents }</textarea>
@@ -52,10 +48,9 @@
 							<a href="javascript:fn_saved(${qnasearch.qna_no });" class="btnType4 grey" id="btnDelete" name="btn"><span>삭제</span></a> 
 						</td>
 						</tr>
-						</c:if>
-								<!-- 댓글 -->			
+						</c:if>		
 						<tr>
-								<th colspan="3">댓글</th>
+							<th colspan="3">댓글</th>
 						</tr>
 						 <tr>
 		                     <th scope="row">댓글 작성자</th>
@@ -113,7 +108,6 @@
       </dl>
       <a href="" class="closePop" id="closeReplyPop"><span class="hidden">닫기</span></a>
 	
-
 	<input type="hidden" id="totalcnt" name="totalcnt" value="${totalcnt }"/>
 	<input type="hidden" id="qna_no"  name="qna_no"  />
 	<input type="hidden" id="reaction"  name="reaction"  />

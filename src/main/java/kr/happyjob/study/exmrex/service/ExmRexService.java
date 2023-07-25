@@ -26,6 +26,5 @@ public interface ExmRexService {
 	
 	/** 검색용 강의 목록 */
 	public List<GradeModel> getLectureList(Map<String, Object> paramMap) throws Exception;
-
 	
 }

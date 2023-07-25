@@ -15,8 +15,6 @@ import kr.happyjob.study.cmmqna.model.QnaReply;
 @Service
 public class CmmQnaServiceImpl implements CmmQnaService {
 	
-	/*2023-07-11 commit 주석*/
-	
 	//logger
 	private final Logger logger = LogManager.getLogger(this.getClass());
 	

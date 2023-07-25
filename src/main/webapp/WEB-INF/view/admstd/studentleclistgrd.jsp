@@ -11,15 +11,12 @@ function fn_userEtc() {
 	var loginID =  $('#student_id').text();
 	var userEtc = $('#userEtc').val();
 	
-	console.log("loginID : " + $('#student_id').text());
-	console.log("userEtc : " + $('#userEtc').val());
 	 if (confirm("저장하시겠습니까?") == true) {
 			var param = {
 					loginID : loginID
 					,userEtc : userEtc
             } ;
              var listcollabck = function(returnvalue) {
-                  /* fn_teacherlist(); */
                   alert("저장되었습니다.");
                   gfCloseModal();
             };

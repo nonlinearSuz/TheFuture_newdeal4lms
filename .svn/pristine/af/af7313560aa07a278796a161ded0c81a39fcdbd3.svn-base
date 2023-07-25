@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.happyjob.study.exmaex.dao.ExmAexDao">
+
+
+<!--  시험 목록 조회 -->
+				<select id="attendtestlist" resultType="kr.happyjob.study.exmaex.model.AttendExamModel">
+						
+								select 		    le.lec_no
+										      ,le.test_no
+										      ,le.lec_name
+										      ,tt.test_name
+										      ,DATE_FORMAT(le.test_start,'%Y.%m.%d') as test_start
+										      ,DATE_FORMAT(le.test_end,'%Y.%m.%d') as test_end
+										      ,rl.acc_yn
+					                          ,(select dt.res_ans 
+					            		           from tb_test_dt dt 
+					            		         where dt.lec_no = le.lec_no
+					            		            and dt.user_id= #{loginID}
+					                              LIMIT 1 ) as res_ans
+			
+									    from tb_lecture le
+									        inner join tb_tests tt on tt.test_no = le.test_no
+									      	   inner join tb_request_list rl on le.lec_no = rl.lec_no
+
+									      
+						 where loginID = #{loginID}
+                         			and rl.acc_yn = 'Y'
+                         				GROUP BY le.lec_no, le.test_no, le.lec_name, tt.test_name, le.test_start, le.test_end, rl.acc_yn
+                         				
+					     	LIMIT #{pageIndex}, #{pageSize}       											     
+								    		 
+				</select>
+				
+				
+<!--  시험 목록 카운트 조회 -->
+	
+		
+				<select id="countattendtestlist" resultType="int">
+				
+				               select 
+										 count(*)
+										
+										        
+										    from tb_lecture le
+										        inner join tb_tests tt on tt.test_no = le.test_no
+										         inner join tb_request_list rl on le.lec_no = rl.lec_no
+										      
+										      where rl.loginID = #{loginID}
+										      		 and rl.acc_yn = 'Y'
+	
+			
+				 </select>
+				 
+				 
+				 
+ <!--  시험 응시  -->
+				<select id="applytest" resultType="kr.happyjob.study.exmaex.model.AttendExamModel">
+						
+						select 
+										       ti.test_no
+										      ,le.lec_no
+										      ,le.lec_name
+										      ,DATE_FORMAT(le.test_start, '%Y%m%d') as test_start							   
+					                          ,ui.name
+					                          ,ts.test_name
+										      ,ti.que_no
+										      ,ti.que_content
+											  ,ti.opt_1
+											  ,ti.opt_2
+										  	  ,ti.opt_3
+										      ,ti.opt_4
+										      ,ti.answer
+							
+
+									    from tb_testinfo ti
+									        inner join tb_lecture le on le.test_no = ti.test_no
+									   	  	   inner join tb_tests ts on ti.test_no = ts.test_no
+                            					inner join tb_userinfo ui on le.lec_prof = ui.loginID
+									      where  le.lec_no = #{lec_no}
+									      			
+					    		 
+				</select>
+				 
+<!--  시험 응시 제출 -->						
+					
+
+
+				<insert id="testsubmitsave">
+				    INSERT INTO tb_test_dt (lec_no, que_no, user_id, res_ans, res_regdate, get_score, cor_yn)
+				    SELECT
+				        #{lec_no},
+				        #{que_no},
+				        #{loginID},
+				        #{res_ans},
+				        NOW(),
+				        IFNULL(
+				       			 ( SELECT score FROM tb_testinfo 
+				       			 		WHERE que_no = #{que_no} AND answer = #{res_ans} LIMIT 1 ),
+				       			 		0
+				       			),
+				        (
+				            CASE
+				                WHEN EXISTS (
+				                    SELECT 1
+				                    FROM tb_testinfo
+				                    WHERE que_no = #{que_no} AND answer = #{res_ans}
+				                ) THEN 'Y'
+				                ELSE 'N'
+				            END
+				        )
+				    FROM DUAL;
+				    
+				  INSERT INTO tb_request_list (lec_no, loginID, tot_score)
+						VALUES (#{lec_no}, #{loginID}, 
+						        (SELECT SUM(get_score) FROM tb_test_dt dt
+						         	WHERE dt.lec_no = #{lec_no} AND dt.user_id = #{loginID})
+						        )
+						ON DUPLICATE KEY UPDATE
+						    tot_score = VALUES(tot_score);
+				
+				
+				</insert>
+					
+					
+				
+
+					
+					
+		
+ <!--  시험 응시 결과 조회 -->
+				<select id="testresult" resultType="kr.happyjob.study.exmaex.model.AttendExamModel">
+						
+					        SELECT
+													        lec_no,
+													        que_no,
+													        user_id,
+													        res_ans,
+													        (
+													            SELECT SUM(get_score)
+													            FROM tb_test_dt AS t
+													            WHERE t.lec_no = tb_test_dt.lec_no
+													                AND t.user_id = tb_test_dt.user_id
+													        ) AS total_score,
+													        res_regdate
+													    FROM tb_test_dt
+													    	WHERE lec_no = #{lec_no}
+													        			AND user_id = #{loginID}
+													   		 GROUP BY lec_no, que_no, user_id, res_ans, res_regdate
+									      			
+					    		 
+				</select>	
+				
+				
+
+
+				
+				
+				
+				
+				
+			
+</mapper>

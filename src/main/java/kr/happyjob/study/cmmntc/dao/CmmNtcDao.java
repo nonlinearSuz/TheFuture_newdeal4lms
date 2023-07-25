@@ -5,7 +5,7 @@ import java.util.Map;
 
 import kr.happyjob.study.cmmntc.model.NoticeModel;
 import kr.happyjob.study.cmmntc.model.NoticeReply;
-/*2023-07-11 commit 주석*/
+
 public interface CmmNtcDao {
 	
 	public List<NoticeModel> noticelist(Map<String, Object> paramMap) throws Exception;

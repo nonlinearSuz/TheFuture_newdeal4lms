@@ -11,8 +11,8 @@
 										      ,le.test_no
 										      ,le.lec_name
 										      ,tt.test_name
-										      ,le.test_start
-										      ,le.test_end
+										      ,DATE_FORMAT(le.test_start,'%Y.%m.%d') as test_start
+										      ,DATE_FORMAT(le.test_end,'%Y.%m.%d') as test_end
 										      ,rl.acc_yn
 					                          ,(select dt.res_ans 
 					            		           from tb_test_dt dt 
@@ -25,10 +25,11 @@
 									      	   inner join tb_request_list rl on le.lec_no = rl.lec_no
 
 									      
-									      where loginID = #{loginID}
+						 where loginID = #{loginID}
                          			and rl.acc_yn = 'Y'
-                         				GROUP BY le.lec_no, le.test_no, le.lec_name, tt.test_name, le.test_start, le.test_end, rl.acc_yn;
-																     
+                         				GROUP BY le.lec_no, le.test_no, le.lec_name, tt.test_name, le.test_start, le.test_end, rl.acc_yn
+                         				
+					     	LIMIT #{pageIndex}, #{pageSize}       											     
 								    		 
 				</select>
 				
@@ -54,13 +55,14 @@
 				 
 				 
 				 
- <!--  시험 응시 선택 조회 -->
+ <!--  시험 응시  -->
 				<select id="applytest" resultType="kr.happyjob.study.exmaex.model.AttendExamModel">
 						
 						select 
 										       ti.test_no
 										      ,le.lec_no
-										      ,le.lec_name										   
+										      ,le.lec_name
+										      ,DATE_FORMAT(le.test_start, '%Y%m%d') as test_start							   
 					                          ,ui.name
 					                          ,ts.test_name
 										      ,ti.que_no
@@ -113,7 +115,7 @@
 				  INSERT INTO tb_request_list (lec_no, loginID, tot_score)
 						VALUES (#{lec_no}, #{loginID}, 
 						        (SELECT SUM(get_score) FROM tb_test_dt dt
-						         WHERE dt.lec_no = #{lec_no} AND dt.user_id = #{loginID})
+						         	WHERE dt.lec_no = #{lec_no} AND dt.user_id = #{loginID})
 						        )
 						ON DUPLICATE KEY UPDATE
 						    tot_score = VALUES(tot_score);

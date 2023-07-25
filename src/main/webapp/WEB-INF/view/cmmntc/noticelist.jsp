@@ -16,7 +16,6 @@
 	var pageSize = 10;  
 	var pageBlockSize = 5;    
 	
-	/** OnLoad event */ 
 	$(function() {
 		// 버튼 이벤트 등록
 		ButtonClickEvent();
@@ -25,9 +24,6 @@
 		
 	});
 	
-
-	/** 버튼 이벤트 등록 */
-
 	function ButtonClickEvent() {
 		$('a[id=closePop]').click(function(e) {
 			e.preventDefault();
@@ -51,22 +47,10 @@
 				noticeList();
 				break;
 			}
-		});
-		
-/* 		$('td[class=rpyno]').click(function(e) {
-			e.preventDefault();
-			
-			var rpyNo = $(this).attr('Id');
-			
-			$("#rpy_no").attr("rpy_no",rpyNo)
-		
-		});	 */
-		
-		
+		});	
 		
 		$('a[name=btn]').click(function(e) {
-			e.preventDefault(); // event의 고유 동작 중단 시키기.
-			//e.stoppropagation => 상위 elements의 event 전파 중단.
+			e.preventDefault(); 
 
 			var btnId = $(this).attr('id');
 
@@ -88,16 +72,13 @@
 				case 'btnClose' :
 					gfCloseModal();
 					break;
-				//댓글 작성
  				case 'btnReply' :
 					fn_reply();
 					break;
-				//댓글 수정
 				case 'btnReplyUpdate' :
 				 $("#reaction").val("U"); 
 					fn_replyes();
 					break;
-				//댓글 삭제
 				case 'btnReplyDelete' :
 				 $("#reaction").val("D"); 
 					fn_replyed();
@@ -111,7 +92,7 @@
 		
 		pagenum = pagenum || 1;
 		
-			var param = { // parameter 값
+			var param = { 
 			  searchKey : $("#searchKey").val()
 			  , sname : $("#sname").val()
 			  , pageSize : pageSize
@@ -139,117 +120,11 @@
 		callAjax("/cmmntc/noticelist.do", "post", "text", false, param, listcollabck) ;
 			
 	}
-	
-/* 	function noticeRvlist(pagenum) {
-			pagenum = pagenum || 1;
-			
-				var param = {
-						pageSize : pageSize
-					,	pageBlockSize : pageBlockSize
-					,	pagenum : pagenum
-					,	rpy_no : rpy_no
-					,	rpy_contents : rpy_contents
-					,	enr_user : '${loginId}'
-					,	enr_date : now()
-				}
-				
-				var listcollback = function(returnvalue) {
-					console.log(returnvalue);
-					
-					$(".re_body").empty().append(returnvalue);
-					
-					var retotalcnt = $("#retotalcnt").val();
-					
-					console.log("retotalcnt : " + retotalcnt);
-					
-					var paginationHtml = getPaginationHtml(pagenum, retotalcnt, pageSize,
-							pageBlockSize, 'noticeRvlist');
-					
-					console.log("paginationHtml : " + paginationHtml);
-					
-					$("#noticeRv").empty().append(paginationHtml);
-					
-					$("#pageno").val(pagenum);
-					
-				}
-				
-				callAjax("cmmntc/noticeRvList.do", "post", "text", false, param, listcollback);
-				
-	} */
-	
-	//상세조회 + 댓글 목록 popup
-/*  	function fn_openReplyPopUp() {
-		openReplyPopUpInit();
-		
-		gfModalPop("#layer2");
-	} 
-	
-	//상세조회 + 댓글 목록 popup
-  	function openReplyPopUpInit(returndata) {
-		if(returndata == "" || returndata == null || returndata == undefined) {
-				$("#nt_no").val(""); //글번호
-				$("#nt_title").val(""); //글제목
-				$("#nt_contents").val(""); //글내용
-				$("#enr_user").val(""); //글작성자 & 댓글 작성자
-				$("#enr_date").val(""); //글 등록일 & 댓글 작성일
-				$("#upd_user").val(""); //글 수정자
-				$("#upd_date").val(""); //글 수정일
-				$("#rpy_no").val(""); //댓글번호
-				$("#rpy_contents").val(""); //댓글내용
-				$("#rpy_writer").val("");
-				$("#rpy_date").val(""); 
-				
-				$("#btnReply").show();
-				
-				$("#action").val("I");
-		} else {
-			$("#nt_no").val(returndata.nt_no);
-			$("#noti_no").text(returndata.nt_no);
-			$("#noti_title").val(returndata.nt_title);
-			$("#noti_writer").text(returndata.enr_user);
-			$("#noti_date").text(returndata.enr_date);
-			$("#noti_contents").val(returndata.nt_contents);
-			$("#rpy_no").val(returndata.rpy_no);
-			$("#rpy_contents").val(returndata.rpy_contents);
-			$("#rpy_writer").val(returndata.enr_user);
-			$("#rpy_date").val(returndata.enr_date);
-			$("#rpy_writer").text(returndata.enr_user);
-			$("#rpy_date").text(returndata.enr_date); 
-			
-			$("#btnReply").hide();
-			
-			$("#action").val("U");
-			
-			//loginID와 작성자가 같을 시 버튼 보이기
-		
-			console.log(returndata);
-
-			 if(noticeRvList.length < 1) {
-				 alert("댓글이 집을 나갔습니다.");
-				 $("#re_title").hide();
-				 $("#re_body").hide();
-				 $("#btnReply").show();
-				 $("#btnReplyUpdate").hide();
-				 $("#btnReplyDelete").hide();
-				 
-				 $("#action").val("I");
-			 } else {
-				 alert("댓글이 왔습니다.");
-				 $("#re_title").show();
-				 $("#re_body").show();
-				 $("#btnReply").show();
-				 $("#btnReplyUpdate").show();
-				 $("#btnReplyDelete").show();
-				 
-				 $("#action").val("U");
-			 }
-		}
-	}   */
 		
 	//작성 popup
 	function fn_openpopup() {
 		
-		popupinit(); // clean()
+		popupinit();
 		
 		// 모달 팝업
 		gfModalPop("#layer1");
@@ -257,9 +132,9 @@
 	}
 	
 	//작성 popup
- 	function popupinit(returndata) {
+ 	function popupinit(object) {
 		
-		if(returndata == "" || returndata == null || returndata == undefined) {
+		if(object == "" || object == null || object == undefined) {
 			$("#nt_no").val("");
 			$("#nt_title").val("");		
 			$("#nt_contents").val("");
@@ -269,12 +144,12 @@
 			
 			$("#action").val("I");	
 		} else {
- 			$("#nt_no").val(returndata.nt_no);
- 			$("#nt_title").val(returndata.nt_title);
- 			$("nt_contents").val(returndata.nt_contents);
-			$("#noti_title").val(returndata.nt_title);
-			$("#noti_writer").val(returndata.enr_user);
-			$("#noti_contents").val(returndata.nt_contents);
+ 			$("#nt_no").val(object.nt_no);
+ 			$("#nt_title").val(object.nt_title);
+ 			$("nt_contents").val(object.nt_contents);  			
+			$("#noti_title").val(object.nt_title);
+			$("#noti_writer").val(object.enr_user); 
+			$("#noti_contents").val(object.nt_contents); 
 			
 			$("#btnSave").hide();
 			
@@ -284,8 +159,6 @@
 	
 	// 상세조회
 	function selectone(no) {
-		
-		//alert(no);
 		
 		var param = {
 				nt_no : no 
@@ -313,7 +186,6 @@
 		fn_save();
 	}
 	
-	//(btnSave, btnUpdate, btnDelete가 사용)
 	function fn_save() {
 		
 		//확인 여부 체크
@@ -322,12 +194,12 @@
 		}
 		
 		var param = {
-				action : $("#action").val(), //작성할땐 action="I"로 잘 나옴
-				nt_no : $("#nt_no").val(), //글 번호 (layer1) 
-				nt_title : $("#nt_title").val(), //글 제목 (layer1)
-				nt_contents : $("#nt_contents").val(), //글 내용 (layer1)
-				noti_title : $("#noti_title").val(), //글 제목(layer2)
-				noti_contents : $("#noti_contents").val(),//글 내용 (layer2)
+				action : $("#action").val(), 
+				nt_no : $("#nt_no").val(),
+				nt_title : $("#nt_title").val(), 
+				nt_contents : $("#nt_contents").val(), 
+				noti_title : $("#noti_title").val(), 
+				noti_contents : $("#noti_contents").val(),
 				enr_user : '${loginId}'
 		}
 		
@@ -339,22 +211,22 @@
 				
 			if(reval.returnval > 0) {
 				
-				if($("#action").val() == "U") { //action이 U이면
+				if($("#action").val() == "U") { 
 					noticeList($("#pageno").val());
 					alert("수정 되었습니다.");
-					gfModalPop("#layer2");
-					
-				}else if($("#action").val() == "I"){
-					alert("작성 되었습니다.");
-					noticeList(); 
 					gfCloseModal();
-				} else {
-					noticeList(); 
-				}
+
+					}else if($("#action").val() == "I"){
+						alert("작성 되었습니다.");
+						noticeList(); 
+						gfCloseModal();
+						} else {
+							noticeList(); 
+					}
 				
-			} else {
-				alert("오류가 발생 되었습니다.");				
-			}		
+				} else {
+					alert("오류가 발생 되었습니다.");				
+				}		
 		}
 		callAjax("/cmmntc/noticesave.do", "post", "json", false, param , savecollback);
 	}
@@ -376,12 +248,16 @@
 	function fn_reply() {
 		var rpy_no = $("#rpy_no").val();
 		
+		if(!fn_rV()) {
+			return;
+		}
+		
 		var param = {
 				reaction : $("#reaction").val(),
 				nt_no : $("#nt_no").val(),
 				rpy_no : $("#rpy_no").val(),
-				rpy_content : $("#rpy_content").val(), //댓글 내용
-				rpy_contents : $("#rpy_contents" + rpy_no).val(),
+				rpy_content : $("#rpy_content").val(), 
+				rpy_contents : $("#rpy_contents" + rpy_no).val(), 
 				enr_user : '${loginId}'
 		}
 			
@@ -391,15 +267,17 @@
 		
 		var resultCallback = function(reval) {
 			if(reval.returnval > 0) {
-				alert("완료되었습니다.");
-				gfCloseModal("#layer2");
 				
 				if($("#reaction").val() == "U") {
-					gfCloseModal();
 					alert("수정되었습니다.");
+					gfModalPop("#layer2");
+				} else if($("#reaction").val() == "I") {
+					alert("작성되었습니다.");
+					noticeList();
+					gfCloseModal();
 				} else {
 					gfCloseModal();
-				} 
+				}
 				
 			} else {
 				alert("오류가 발생하였습니다.");
@@ -411,18 +289,56 @@
 	
 	// 유효성 검사
 	function fn_Validate() {
+		var action = $("#action").val();
+		
+		//작성
+		if(action === "I") {
+			var chk = checkNotEmpty(
+					[		
+					 		["nt_title", "제목을 입력해 주세요"]
+					 	,	["nt_contents", "내용을 입력해주세요"]
+					]
+			);
 
-		var chk = checkNotEmpty(
-				[
-						["noti_title","제목을 입력해 주세요!"]	
-					,	["noti_contents","내용을 입력해주세요!"]
-				]
-		);
-
-		if (!chk) {
-			return;
+			if (!chk) {
+				return;
+			}
+		}
+		
+		//수정
+		if(action === "U") {
+			var chks = checkNotEmpty(
+					[
+					 		["noti_title", "제목을 입력해 주세요!!"]
+					 	,	["noti_contents", "내용을 입력해 주세요!!!"]	
+					 ]	
+				);
+				
+				if(!chks) {
+					return;
+				}
 		}
 
+		return true;
+	}
+	
+	//유효성 검사
+	function fn_rV() {
+		var reaction = $("#reaction").val();
+		
+		//작성 시 
+		if(reaction === "I") {
+			var check = checkNotEmpty(
+				[
+				 		["rpy_content", "글을 작성해주세요!"]
+				 ]		
+			);
+			
+			if(!check) {
+				return;
+			}
+		}
+		
 		return true;
 	}
 </script>
@@ -435,7 +351,7 @@
 	<input type="hidden" id="nt_no"  name="nt_no"  />
 <!-- 	<input type="hidden" id="rpy_no"  name="rpy_no"  /> -->
 	<input type="hidden" id="pageno"  name="pageno"  />
-	<!-- 모달 배경 -->
+
 	<div id="mask"></div>
 
 	<div id="wrap_area">
@@ -447,8 +363,8 @@
 		<div id="container">
 			<ul>
 				<li class="lnb">
-					<!-- lnb 영역 --> <jsp:include
-						page="/WEB-INF/view/common/lnbMenu.jsp"></jsp:include> <!--// lnb 영역 -->
+					<jsp:include
+						page="/WEB-INF/view/common/lnbMenu.jsp"></jsp:include>
 				</li>
 				<li class="contents">
 					<!-- contents -->

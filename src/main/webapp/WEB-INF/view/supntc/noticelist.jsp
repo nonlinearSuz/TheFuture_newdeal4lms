@@ -2,7 +2,6 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<!-- commit -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -17,7 +16,6 @@
 	var pageSize = 10;  
 	var pageBlockSize = 5;    
 	
-	/** OnLoad event */ 
 	$(function() {
 		// 버튼 이벤트 등록
 		ButtonClickEvent();
@@ -25,8 +23,6 @@
 		noticeList();
 		
 	});
-	
-	/** 버튼 이벤트 등록 */
 
 	function ButtonClickEvent() {
 		$('a[id=closePop]').click(function(e) {
@@ -42,8 +38,7 @@
 		});
 		
 		$('a[name=btn]').click(function(e) {
-			e.preventDefault(); // event의 고유 동작 중단 시키기.
-			//e.stoppropagation => 상위 elements의 event 전파 중단.
+			e.preventDefault(); 
 
 			var btnId = $(this).attr('id');
 
@@ -106,11 +101,10 @@
 	
 	function fn_openpopup() {
 		
-		popupinit(); // clean()
+		popupinit();
 		
 		// 모달 팝업
 		gfModalPop("#layer1");
-		
 		
 	}
 	
@@ -156,10 +150,8 @@
 		}
 	}
 	
-	// 한건 조회
+	// 상세 조회
 	function fn_selectone(no) {
-		
-		//alert(no);
 		
 		var param = {
 				nt_no : no
@@ -178,7 +170,7 @@
 
 	}
 	
-	// 글 등록 maybe?
+	// 글 등록
 	function fn_save() {
 		
 		if ( ! fn_Validate() ) {
@@ -241,7 +233,6 @@
 	<input type="hidden" id="action"  name="action"  />
 	<input type="hidden" id="nt_no"  name="nt_no"  />
 	<input type="hidden" id="pageno"  name="pageno"  />
-	<!-- 모달 배경 -->
 	<div id="mask"></div>
 
 	<div id="wrap_area">
@@ -253,7 +244,7 @@
 		<div id="container">
 			<ul>
 				<li class="lnb">
-					<!-- lnb 영역 --> <jsp:include
+				 <jsp:include
 						page="/WEB-INF/view/common/lnbMenu.jsp"></jsp:include> <!--// lnb 영역 -->
 				</li>
 				<li class="contents">
@@ -308,7 +299,7 @@
 	
 						<div class="paging_area"  id="noticePagination"> </div>&nbsp;
 						 
-					</div> <!--// content -->
+					</div> 
 
 					<h3 class="hidden">풋터 영역</h3>
 						<jsp:include page="/WEB-INF/view/common/footer.jsp"></jsp:include>
@@ -331,66 +322,6 @@
 			</dt>
 		</c:if>		
 			<dd class="content">
-				<!-- s : 여기에 내용입력 -->
-				<table class="row">
-					<colgroup>
-                                 <col width="70px">
-                                 <col width="*">
-                                 <col width="70px">
-                                 <col width="*">
-					</colgroup>
-
-					<tbody>
-						<tr>
-							<th scope="row">제목</th>
-							<td colspan="4"><input type="text" class="inputTxt p100" name="nt_title" id="nt_title" /></td>
-						</tr>
-						
-						<tr>
-							<th scope="row">작성자</th>
-							<td id="noti_writer"></td>
-							<th scope="row">조회수</th>
-							<td id="noti_cnt"></td>
-						</tr>
-						
-						<tr>
-								<th scope="row">등록일</th>
-							<td colspan="4"  id="noti_date"></td>
-						</tr>
-						
-						<tr>
-							<th scope="row">내용</th>
-							<td colspan="4"  style="text-align: left;">
-							    <textarea id="nt_contents" name="nt_contents" ></textarea>
-							</td>
-						</tr>
-						
-					</tbody>
-				</table>
-
-				<!-- e : 여기에 내용입력 -->
-
-				<div class="btn_areaC mt30">
-				 <c:if test="${sessionScope.userType eq 'M'}">
-					<a href="" class="btnType blue" id="btnSave" name="btn"><span>작성</span></a>
-					<a href="" class="btnType blue" id="btnUpdate" name="btn"><span>수정</span></a>
-					<a href="" class="btnType blue" id="btnDelete" name="btn"><span>삭제</span></a>
-				</c:if>	 
-					<a href=""	class="btnType gray"  id="btnClose" name="btn"><span>취소</span></a>
-				</div>
-			</dd>
-		</dl>
-		<a href="" class="closePop" id="closePop"><span class="hidden">닫기</span></a>
-	</div>
-	
-<%-- <c:if test="${sessionScope.userType == 'T' || sessionScope.userType == 'S' }">
-	<div id="layer1" class="layerPop layerType2" style="width: 600px;">
-		<dl>
-			<dt>
-				<strong>공지사항</strong>
-			</dt>
-			<dd class="content">
-				<!-- s : 여기에 내용입력 -->
 				<table class="row">
 					<colgroup>
                                  <col width="70px">
@@ -439,8 +370,7 @@
 		</dl>
 		<a href="" class="closePop" id="closePop"><span class="hidden">닫기</span></a>
 	</div>
-</c:if>	 --%>
-	<!--// 모달팝업 -->
+
 </form>
 </body>
 </html>

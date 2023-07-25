@@ -17,11 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import kr.happyjob.study.cmmntc.model.NoticeModel;
 import kr.happyjob.study.cmmqna.model.Qna;
 import kr.happyjob.study.cmmqna.model.QnaReply;
 import kr.happyjob.study.cmmqna.service.CmmQnaService;
-/*2023-07-11 commit 주석*/
+
 @Controller
 @RequestMapping("/cmmqna/")
 public class CmmQnaController {
@@ -74,20 +73,14 @@ public class CmmQnaController {
 	public String detailQnaList(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
 			HttpServletResponse response, HttpSession session) throws Exception {
 		
-		int qna_no = Integer.parseInt(((String)paramMap.get("qna_no")).trim());
+		/*int qna_no = Integer.parseInt(((String)paramMap.get("qna_no")).trim());*/
 		
 		logger.info("+ Start " + className + ".detailQnaList");
-		logger.info(" - paramMapkjhkjkjkjjk : " + paramMap);
+		logger.info(" - paramMap : " + paramMap);
 		
 		//qna 조회
 		Qna qnasearch = cmmQnaService.detailQnaList(paramMap);
 		logger.info(" - qnasearch : " + qnasearch);
-/*		//카테고리 역할
-		String categoryName =(String) paramMap.get("category_name");
-		if(categoryName != null) {
-			int categoryNo = remodelCategoryNo(categoryName);
-			paramMap.put("category_no", categoryNo);
-		}*/
 		
 		//조회수 증가
 		if(qnasearch != null) {
@@ -100,15 +93,15 @@ public class CmmQnaController {
 		String name = (String) session.getAttribute("name");
 		model.addAttribute("name", name);
 		
-		logger.info(" - qna_nohhhhhh : " + paramMap);
-		logger.info(" - paramMapkjhkjkjkjjk 111111: " + paramMap);
+		logger.info(" - qna_no : " + paramMap);
+		logger.info(" - paramMap: " + paramMap);
 		//댓글 기능 
 		List<QnaReply> qnaRvList = cmmQnaService.detailQnaRvList(paramMap);
 		
-		/*Map<String, Object> returnMap = new HashMap<String , Object> ();*/
 		model.addAttribute("qnasearch", qnasearch);
 		model.addAttribute("qnaRvList", qnaRvList);
 		model.addAttribute("loginID", loginID);
+		model.addAttribute("name", name);
 		
 		logger.info(" - qnasearch : " + qnasearch);
 		logger.info(" - qnaRvList : " + qnaRvList); // []
@@ -116,13 +109,6 @@ public class CmmQnaController {
 		
 		return "cmmqna/qnadetailpopup";
 	}
-	
-/*	private int remodelCategoryNo(String categoryName) {
-		//공통코드에선 category가 name으로 잡혀 있고 db에선 category가 no로 pk 되있어서 category_no로 가져와야 name이 뜨는데 
-		//parameter로 가져올때 category_name으로 가져오면 공통코드가 적용되고 db로는 못찾는다.
-		//그렇다면 db를 따라서 category_name을 category_no로 인식하게 만들어야 되는데
-		//return 0;
-	}*/
 
 	//글 등록
 	@RequestMapping("qnaSave.do")
@@ -136,6 +122,7 @@ public class CmmQnaController {
 		String action = (String) paramMap.get("action");
 		
 		paramMap.put("loginId", (String) session.getAttribute("loginId"));
+		paramMap.put("name", (String) session.getAttribute("name"));
 		
 		int returnval = 0;
 		
@@ -164,6 +151,7 @@ public class CmmQnaController {
 		
 		String reaction = (String) paramMap.get("reaction");
 		paramMap.put("loginId", (String) session.getAttribute("loginId"));
+		paramMap.put("name", (String) session.getAttribute("name"));
 		
 		int returnval = 0;
 		

@@ -10,7 +10,7 @@
 							</c:if>
 							
 							<c:if test="${totalcnt > 0 }">
-								<c:forEach items="${noticesearchlist}" var="list">
+								<c:forEach items="${teachersearchlist}" var="list">
 									<tr>
 										<td><a href="javascript:fn_selectone('${list.loginID}')">${list.name}(${list.loginID})</a></td>
 										<td>${list.user_hp}</td>

@@ -40,25 +40,25 @@
                   <th colspan="4">강의 설문 결과</th>
                </tr>
 
-                <!-- 설문조사 for문 돌릴영역 -->
-         <%
-             List<SurveyModel> surveyChartModel = (List<SurveyModel>) request.getAttribute("surveyChartModel");
-         
-                 int rowCount = 8; // 생성할 행의 개수
-         
-                 for (int i = 0; i < rowCount; i++) {
-                     String chartId = "myChart" + (i + 1); // id 값 동적 생성
-                     SurveyModel model = surveyChartModel.get(i+1);
-         %>
-                     <tr>
-                         <th scope="row">Q<%= i+2 %>. <br>
-                         <%= model.getQst_content() %></th>
-                         <td colspan="3"><canvas id="<%=chartId%>" width="600" height="200"></canvas></td>
-                     </tr>
-         <%
-                 }
-         %>
-            </tbody>
+       		        <!-- 설문조사 for문 돌릴영역 -->
+					<%
+						List<SurveyModel> surveyChartModel = (List<SurveyModel>) request.getAttribute("surveyChartModel");
+					
+					   int rowCount = 8; // 생성할 행의 개수(문제의 수)
+
+						//rowCount만큼 반복하면서 각 질문의 차트를 생성하는 반복문
+						for (int i = 0; i < rowCount; i++) {
+							String chartId = "myChart" + (i + 1); //각 질문에 대한 차트를 구분하기 위해 고유한 chartId를 동적 생성
+							SurveyModel model = surveyChartModel.get(i + 1); //리스트에서 i+1번째(0이 아닌 1부터 시작) 데이터를 가져옴
+					%>
+					<tr>
+						<th scope="row">Q<%=i + 2%>. <br> <%=model.getQst_content()%></th>
+						<td colspan="3"><canvas id="<%=chartId%>" width="600" height="200"></canvas></td>
+					</tr>
+					<%
+						}
+					%>
+				</tbody>
          </table>
 
 
@@ -100,14 +100,7 @@
       </c:if>
    </c:forEach>
    
-   label1 = label1.toString().split(",");
-   label2 = label2.toString().split(",");
-   label3 = label3.toString().split(",");
-   label4 = label4.toString().split(",");
-   label5 = label5.toString().split(",");
-   
-   
-   
+
    for(var i = 0; i < 5; i++)
    {
       labelsA[i] = labels[i].toString().split(",").slice(0,5);
@@ -132,7 +125,7 @@
    labelsA[4].splice(5, 0, "");
    labelsA[4].splice(6, 0, "");
    
-   var count1 = [];
+   var count1 = [];  // 1,0,0,0,1,..
    var count2 = [];
    var count3 = [];
    var count4 = [];
@@ -146,44 +139,49 @@
    count5.push("${item.count5}");
    </c:forEach>
    
-   count1 = count1.toString().split(",").slice(1, -2);
+   count1 = count1.toString().split(",").slice(1, -2);		// 1번, 10번, 11번 문제 제외		
    count2 = count2.toString().split(",").slice(1, -2);
    count3 = count3.toString().split(",").slice(1, -2);
    count4 = count4.toString().split(",").slice(1, -2);
    count5 = count5.toString().split(",").slice(1, -2);
    
-   
-
    var nCnt = 8; // 총 문항 11개중 서술형 답변 1,10,11 제외하여 8번
    var surveyChartModel = "${surveyChartModel[0]}";
    //model.addAttribute("surveyChartModel", surveyChartModel);
 
-   var onesCount = 0;
-   count1.forEach(function(value) {
-      if (value === "1") {
-         onesCount++;
-      }
-   });
+   var counts = [count1, count2, count3, count4 ,count5];
+ 
+   var peopleCnt = [];
+   		for(var i = 0; i < counts.length; i++) {
+   			peopleCnt.push(counts[i][0]);
+   		};
+   			
+        var onesCount = 0;
 
-   for (var i = 1; i <= nCnt; i++) {
-      var ctx = document.getElementById('myChart' + i);
-      new Chart(ctx, {
-         type: 'bar',
+        $.each(peopleCnt, function(index, value) {
+        	onesCount += parseInt(value);
+        });
+   			//counts[i][0]; 
+
+   /* 설문조사 결과를 바탕으로 그래프를 그리기 위한 부분 */
+   for (var i = 1; i <= nCnt; i++) {	// 반복문을 사용하여 각 질문에 대한 차트를 생성
+      var ctx = document.getElementById('myChart' + i);	// id가 'myChart' + i인 요소
+      new Chart(ctx, {	//Chart.js 라이브러리를 이용하여 차트를 생성
+         type: 'bar',			//차트 타입 바 차트
          data: {
+        	 //막대의 라벨 설정. labelsA[0][i-1]은 i-1번째 질문의 첫 번째 선택지, labelsA[1][i-1]은 두 번째 선택지를 의미
             labels: [labelsA[0][i-1],labelsA[1][i-1],labelsA[2][i-1],labelsA[3][i-1],labelsA[4][i-1]],
-            datasets: [{
+            datasets: [{	
+            	// count1, count2, count3, count4, count5는 각 선택지별로 해당 질문에 대한 응답 수
+            	// count1[i - 1]은 i-1번째 질문의 첫 번째 선택지에 대한 응답 수, count2[i - 1]은 두 번째 선택지의 응답 수
                data: [count1[i - 1], count2[i - 1], count3[i - 1], count4[i - 1], count5[i - 1]],
-               
                backgroundColor: [  
-                                 'rgba(255, 95, 95, 1)',    // 매우 불만족 - 연한 빨강
-                                 'rgba(255, 180, 95, 1)',   // 불만족 - 연한 주황
-                                 'rgba(255, 228, 95, 1)',   // 보통 - 연한 노랑
+                                 'rgba(255, 95, 95, 1)',      // 매우 불만족 - 연한 빨강
+                                 'rgba(255, 180, 95, 1)',    // 불만족 - 연한 주황
+                                 'rgba(255, 228, 95, 1)',    // 보통 - 연한 노랑
                                  'rgba(142, 219, 120, 1)',  // 만족 - 연한 초록
                                  'rgba(120, 160, 255, 1)'   // 매우 만족 - 연한 파랑
-            ]                                  
-                                               
-
-                                               
+          	   ]                                  
             }]
          },
          options: {

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import kr.happyjob.study.cmmntc.dao.CmmNtcDao;
 import kr.happyjob.study.cmmntc.model.NoticeModel;
 import kr.happyjob.study.cmmntc.model.NoticeReply;
-/*2023-07-11 commit 주석*/
+
 @Service
 public class CmmNtcServiceImpl implements CmmNtcService {
 	
@@ -58,11 +58,6 @@ public class CmmNtcServiceImpl implements CmmNtcService {
 	public int updateViewCnt(int nt_no) throws Exception {
 		return cmmNtcDao.updateViewCnt(nt_no);
 	}
-	
-/*	//글을 작성한 유저의 아이디 가져오기
-	public String getWriterId(int nt_no) throws Exception {
-		return cmmNtcDao.getWriterId(nt_no);
-	}*/
 	
 	//댓글
 	public List<NoticeReply> noticeReply(int nt_no) throws Exception {

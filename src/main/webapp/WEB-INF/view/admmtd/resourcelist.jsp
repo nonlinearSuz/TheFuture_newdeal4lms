@@ -22,16 +22,12 @@
 	$(function() {
 		
 		comcombo("room_no", "room_no", "all","");
-		// 버튼 이벤트 등록
 		fRegisterButtonClickEvent();
-		
 		fn_noticelist();
-		
 		
 	});
 	
 
-	/** 버튼 이벤트 등록 */
 
 	function fRegisterButtonClickEvent() {
 		$('a[name=btn]').click(function(e) {
@@ -109,8 +105,7 @@
 	function fn_openpopup() {
 		
 		popupinit();
-		
-		// 모달 팝업
+
 		gfModalPop("#layer1");
 	}
 	
@@ -159,8 +154,7 @@
 			console.log( JSON.stringify(returndata) );
 			
 			popupinit(returndata.resourcesearch);
-		
-			// 모달 팝업
+
 			gfModalPop("#layer1");
 			
 		}
@@ -205,7 +199,6 @@
 						}
 					}
 					
-		//callAjax("/admmtd/itemsave.do", "post", "json", false, param, savecollback) ;
 		callAjax("/admmtd/itemsave.do", "post", "json", false, $("#myForm").serialize() , savecollback) ;
 		
 	}
@@ -338,7 +331,9 @@
                                     </tr>
                                      <tr>
                                         <th scope="row">갯수</th>
-                                        <td colspan="3"><input type="text" class="inputTxt p100" name="item_vol" id="item_vol" /></td>
+                                        <td colspan="3"><input type="text" class="inputTxt p100" name="item_vol" id="item_vol" 
+                                         oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');" placeholder = "숫자를 입력하세요."/>
+                                        </td>
                                     </tr>
                                      <tr>
                                         <th scope="row">강의실명</th>

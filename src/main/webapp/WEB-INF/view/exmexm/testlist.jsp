@@ -29,10 +29,8 @@
 		
 		selectComCombo("lecbyuser","","lecbyusercombo","all",""); 
 	
-		// 시험 등록 조회
 		fn_ListExam();
 		
-		// 버튼 이벤트 등록
 		fRegisterButtonClickEvent();
 	});
 	
@@ -195,21 +193,17 @@
 		
 		// 신규 저장
 		if (test_no == null || test_no=="") {
-			// Tranjection type 설정
+
 			$("#action").val("I");
 			
-			// 시험 등록 폼 초기화
 			ininExam();
-			
-			// 모달 팝업
+		
 			gfModalPop("#layer1");
 
-		// 수정 저장
 		} else {
-			// Tranjection type 설정
+
 			$("#action").val("U");
 			
-			// 시험 등록 한건 조회
 			SelectExam(test_no);
 		}
 	}
@@ -235,8 +229,7 @@
 		var resultCallback = function(data) {
 			flistGrpCodResult(data, currentPage);
 		};
-		//Ajax실행 방식
-		//callAjax("Url",type,return,async or sync방식,넘겨준거,값,Callback함수 이름)
+
 		callAjax("/exmexm/testlist.do", "post", "text", false, param, resultCallback);
 	}
 	
@@ -247,29 +240,24 @@
 	/** 시험 등록 조회 콜백 함수 */
 	function flistGrpCodResult(data, currentPage) {
 		
-		//swal(data);
 		console.log(data);
 		
-		// 기존 목록 삭제
+
 		$('#listExam').empty();
 		
-		// 신규 목록 생성
+
 		$("#listExam").append(data);
-		
-		// 총 개수 추출
-		
-		var totalexam = $("#totalexam").val();
 		
 
 		
-		// 페이지 네비게이션 생성
+		var totalexam = $("#totalexam").val();
+
 		
 		var paginationHtml = getPaginationHtml(currentPage, totalexam, pageSizeTest, pageBlockSizeTest, 'fn_ListExam');
 		console.log("paginationHtml : " + paginationHtml);
-		//swal(paginationHtml);
+
 		$("#comnGrpCodPagination").empty().append( paginationHtml );
 		
-		// 현재 페이지 설정
 		$("#currentPageComnGrpCod").val(currentPage);
 	}
 	
@@ -366,22 +354,16 @@
 				return;
 			}
 			
-			// Tranjection type 설정
 			$("#action").val("I");
 			
-			// 시험 문제 등록 폼 초기화
 			initTestDetail();
-			
-			// 모달 팝업
+
 			gfModalPop("#layer2");
 
-		// 수정 저장
 		} else {
-			
-			// Tranjection type 설정
+		
 			$("#action").val("U");
 			
-			// 시험 문제 등록 한건 조회
 			SelectTestDetail(test_no, que_no);
 		}
 	}
@@ -395,7 +377,6 @@
 		
 		currentPage = currentPage || 1;
 		
-		// 시험 등록 정보 설정
 		$("#examtest_no").val(test_no);
 		$("#examtest_name").val(test_name);
 		
@@ -414,8 +395,7 @@
 			
 			var paginationHtml = getPaginationHtml(currentPage, totalque, pageSizeQ, pageBlockSizeQ, 'fn_ListTestDetail', [test_no]);
 			$("#comnDtlCodPagination").empty().append( paginationHtml );
-			
-			// 현재 페이지 설정
+
 			$("#currentPageComnDtlCod").val(currentPage);
 
 		};
@@ -442,7 +422,6 @@
 								
 			initTestDetail(returndata.examdetailsearch);
 			
-			// 모달 팝업
 			gfModalPop("#layer2");
 			
 		}
@@ -457,7 +436,6 @@
 	
 	/** 시험 문항 저장 */
 	function SaveTestDetail() {
-
 	
 		if ( ! ValidateTestDetail() ) {
 			return;
@@ -487,15 +465,12 @@
 							if($("#action").val() == "U") {
 								fn_ListTestDetail($("#currentPageComnDtlCod").val());
 							} else {
-								fn_ListTestDetail();  //현재 목록 조회
-							
+								fn_ListTestDetail(); 							
 							}
 						}  
-						
-						else {
-				
-				alert("오류가 발생 되었습니다.");				
-			}
+						else {				
+									alert("오류가 발생 되었습니다.");				
+								}
 		}
 	
 		callAjax("/exmexm/quesave.do", "post", "json", false, $("#myForm").serialize(), savecollback);
@@ -640,6 +615,8 @@
 						<div class="paging_area"  id="comnDtlCodPagination"> </div>
 
 					</div> <!--// content -->
+
+
 
 					<h3 class="hidden">풋터 영역</h3>
 						<jsp:include page="/WEB-INF/view/common/footer.jsp"></jsp:include>

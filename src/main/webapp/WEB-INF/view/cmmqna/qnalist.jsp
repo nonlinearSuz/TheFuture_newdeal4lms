@@ -9,7 +9,6 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <title>Q&A</title>
 <jsp:include page="/WEB-INF/view/common/common_include.jsp"></jsp:include>
-<!-- 2023-07-11 commit!! 주석 -->
 <script type="text/javascript">
 
 	var pageSize = 10;  
@@ -28,7 +27,6 @@
 		
 	});
 	
-	/** 버튼 이벤트 등록 */
 	function ButtonClickEvent() {
 		$('a[id=closePop]').click(function(e) {
 			e.preventDefault();
@@ -88,7 +86,7 @@
 		
 		pagenum = pagenum || 1;
 		
-			var param = { // parameter 값
+			var param = { 
 				categoryName : $("#category_name").val()
 			  ,	searchKey : $("#searchKey").val()
 			  , sname : $("#sname").val()
@@ -120,102 +118,12 @@
 	
 	function fn_openpopup() {
 		
-		popupinit(); // clean()
+		popupinit(); 
 		
 		// 모달 팝업
 		gfModalPop("#layer1");
 	
 	}
-	
-/* 	function qna_openpopup() {
-		
-		qna_popupinit(); // clean()
-
-		gfModalPop("#layer2");
-	
-	} */
- 	
-/* 	function qna_popupinit(object) {
-		
-		if(object == "" || object == null || object == undefined) {
-			$("#qna_no").val("");
-			$("#qna_title").val("");
-			$("#category_no").val("");
-			$("#category_namepopup").val("");
-			$("#category_name").val("");
-			$("#qna_contents").val("");
-			$("#enr_user").val("");
-			$("#enr_date").val("");
-			
-			$("#btnUpdate").hide();
-			$("#btnDelete").hide();
-			
-			$("#action").val("I");	
-		} else { 
-			$("#qna_no").val(object.qna_no); 
-			$("#title").val(object.qna_title);
-			$("#category_namepopup2").val(object.category_no);
-			$("#category_name").val(object.category_name);
-		    $("#category_no").val(object.category_no);
-			$("#qna_contentsTo").val(object.qna_contents);
-			$("#qna_writer").text(object.enr_user);
-			$("#qna_date").text(object.enr_date);
-			
-			$("#btnUpdate").show();
-			$("#btnDelete").show();
-			
-			$("#action").val("U");
-			
-			var loginID = "${loginId}";
-			var qnaSearch = object;
-			if(qnaSearch.enr_user === loginID) {
-				$("#changeArea").show();
-			} else {
-				$("#changeArea").hide();
-			}
-			var qnaRvList = object.qnaRvList || [];
-			console.log(qnaRvList);
-			
-			if(qnaRvList.length < 1) {
-				alert("나간다~~~");
-				$("#re_title").hide();
-				$("#re_body").hide();
-				$("#btnReply").show();
-				$("#btnReplyUpdate").hide();
-				$("#btnReplyDelete").hide();
-				
-				$("#action").val("I");
-			} else {
-				alert("들어왔다~~");
-				$("#re_title").show();
-				$("#re_body").show();
-				$("#btnReply").show();
-				$("#btnReplyUpdate").show();
-				$("#btnReplyDelete").show();
-				
-				$("#action").val("U");
-			}
-			
-			var $reBody = $(".re_body");
-			$reBody.html("");
-			
-			if(qnaRvList.length === 0) {
-				$reBody.append("<tr><td colspan='3'>댓글이 없습니다.</td></tr>")
-				console.log("dddddddddddddd");
-			} else {
-				for(var i=0; i<qnaRvList.length; i++) {
-					var qnaReply = qnaRvList[i];
-					var $tr = $("<tr>");
-					var $td1 = $("<td>").text(qnaReply.enr_user);
-					var $td2 = $("<td>").css("word-break", "break-all").text(qnaReply.rpy_contents);
-					var $td3 = $("<td>").text(qnaReply.enr_date);
-					
-					$tr.append($td1, $td2, $td3);
-					$reBody.append($tr);
-				}
-			}
-		}
-	} */
 	
 	function popupinit(object) {
 		
@@ -272,8 +180,6 @@
 			console.log("category_namepopup : " + category_namepopup);
 			console.log("no : " + no);
 			
-			//alert("category_namepopup : " + category_namepopup);
-			
 			comcombo("category_name","category_namepopup2","all",category_namepopup.trim());
 			// 모달 팝업
 			gfModalPop("#layer2");
@@ -284,12 +190,15 @@
 		
 	}
 	
+	// 수정 버튼(상세 정보)
  	function fn_saves(no) {
- 		$("#qna_no").val(no);
-		$("#action").val("U");
+
+ 		$("#action").val("U");
+		$("#qna_no").val(no);
 		fn_save();
-	} 
+	}
 	
+	//글 삭제
 	function fn_saved(no) {
 		$("#qna_no").val(no);
 		$("#action").val("D");
@@ -301,13 +210,13 @@
 		
 		if ( ! fn_Validate() ) {
 			return;
-		}
-		
+		} 
+	
 		var param = {
 				action : $("#action").val(), 
 				qna_no : $("#qna_no").val(),
 				qna_title : $("#qna_title").val(), //글 제목
-				title : $("#title").val(),
+ 				title : $("#title").val(),
 				category_no : $("#category_namepopup").val(), // 숫자 1
 				category_name : $("#category_name").val(),
 				qna_contents : $("#qna_contents").val(), //글 내용
@@ -316,6 +225,7 @@
 		}
 		
 		console.log("fn_save_param" + JSON.stringify(param));
+		
 		var savecollback = function(reval) {
 			console.log( JSON.stringify(reval) );
 			
@@ -327,7 +237,7 @@
 					qnaList($("#pageno").val());
 				} else {
 					qnaList();
-				}
+				} 
 				
 			}  else {
 				alert("오류가 발생 되었습니다.");				
@@ -341,6 +251,9 @@
 	
  	//댓글 등록
  	function fn_reply() {
+		if(!fn_rV()) {
+			return;
+		}
  		var rpy_no = $("#rpy_no").val();
  		
  		var param = {
@@ -353,6 +266,7 @@
  				rpy_contents : $("#rpy_contents" + rpy_no).val(),
  				enr_user : '${loginId}'
  		}
+ 		
  		var resultCallback = function(data) {
  			console.log(JSON.stringify(data));
  			
@@ -366,7 +280,7 @@
  					qnaList();
  					gfCloseModal();
  				} else {
- 					qnaList();
+ 					gfCloseModal();
  				}
  			} else {
  				alert("오류 발생");
@@ -390,20 +304,51 @@
 	
 	// 유효성 검사
 	function fn_Validate() {
-
-		var chk = checkNotEmpty(
-				[
-						[ "title", "제목을 입력해 주세요." ]
-					,	[ "qna_contentsTo", "내용을 입력해 주세요" ]
-				]
-		);
-
-		if (!chk) {
-			return;
+		var action = $("#action").val();
+		
+		if(action === "I") {
+	 		var chk = checkNotEmpty(
+					[		
+					 		["qna_title", "제목을 입력해 주세요."]
+					 	,	["qna_contents", "내용을 입력해 주세요"]	
+					]
+			); 
+	 		
+	 		if(!chk) {
+	 			return;
+	 		}
 		}
 
+ 		if(action === "U") {
+ 	 		var chking = checkNotEmpty(
+ 	 	 			[
+ 	 	 			 		["title", "제목을 입력해주세요!"]
+ 	 	 			 	,	["qna_contentsTo", "내용을 입력해주세요!"]
+ 	 	 			 ]	
+ 	 	 		);
+ 	 		
+ 	 		if(!chking) {
+ 	 			return;
+ 	 		}
+ 		}
+ 		
 		return true;
+	}
+	
+	function fn_rV() {
+		var reaction = $("#reaction").val();
 		
+		if(reaction === "I") {
+			var check = checkNotEmpty([
+			  		 ["rpy_content", "글을 작성해주세요!"]                         
+			  ]);
+			
+			if(!check) {
+				return;
+			}
+		}
+		
+		return true;
 	}
 </script>
 

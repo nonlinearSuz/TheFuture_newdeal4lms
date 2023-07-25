@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import kr.happyjob.study.cmmntc.model.NoticeModel;
 import kr.happyjob.study.cmmntc.model.NoticeReply;
 import kr.happyjob.study.cmmntc.service.CmmNtcService;
-/*2023-07-11 commit 주석*/
+
 @Controller
 @RequestMapping("/cmmntc/")
 public class CmmNtcController {
@@ -39,10 +39,6 @@ public class CmmNtcController {
 		logger.info(" - paramMap : " + paramMap);
 		
 		logger.info(" + End " + className + ".noticeList");
-		
-/*		//접속 시 초기화면으로 보여주기
-		String loginID = (String) session.getAttribute("loginId");
-		paramMap.put("loginID", loginID);*/
 		
 		return "cmmntc/noticelist";
 	}
@@ -103,7 +99,6 @@ public class CmmNtcController {
 		List<NoticeReply> noticeRvList = cmmNtcService.noticeReply(nt_no);
 		logger.info(" - noticeRvList :  ★" + noticeRvList);
 		
-		//Map<String, Object> returnMap = new HashMap<String, Object> ();
 		model.addAttribute("noticesearch", noticesearch);
 		model.addAttribute("noticeRvList", noticeRvList);
 		model.addAttribute("loginID", loginID );
@@ -170,7 +165,6 @@ public class CmmNtcController {
 		}
 		
 		Map<String, Object> returnMap = new HashMap<String, Object> ();
-		/*returnMap.put("rpy_no", rpy_no);*/
 		returnMap.put("returnval", returnval);
 		logger.info("noticeResave.do paramMap !!  : " + paramMap);
 		logger.info("noticeResave.do returnMap : " + returnMap);

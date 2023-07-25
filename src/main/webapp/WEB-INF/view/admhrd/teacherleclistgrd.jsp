@@ -8,22 +8,25 @@
 // 회원정보(비고) 수정
 function fn_userEtc() {
 	
-	var loginID =  $('#teacher_id').text();
+	var loginID =  $('#teacher_id').text();	
 	var userEtc = $('#userEtc').val();
 	
 	console.log("loginID : " + $('#teacher_id').text());
 	console.log("userEtc : " + $('#userEtc').val());
 	 if (confirm("저장하시겠습니까?") == true) {
-			var param = {
+			
+		 	// Ajax 요청에 전달할 매개변수를 객체 형태로 param 변수에 정의 
+		 	var param = {
 					loginID : loginID
 					,userEtc : userEtc
             } ;
-             var listcollabck = function(returnvalue) {
-                  /* fn_teacherlist(); */
+             var listcallback = function(returnvalue) {
+            	 // Ajax 요청이 성공적으로 완료되면 실행될 콜백 함수를 정의
+            	 // 콜백 함수는 returnvalue라는 매개변수를 받아서 사용
                   alert("저장되었습니다.");
                   gfCloseModal();
             };
-             callAjax("/admhrd/userEtc.do", "post", "text", false, param, listcollabck) ;
+             callAjax("/admhrd/userEtc.do", "post", "text", false, param, listcallback) ;
         } else {
             return false;
         }	
@@ -135,11 +138,12 @@ function fn_userEtc() {
 							</tbody>
 							</tbody>
 						</table>
+						</div>
 						<div class="btn_areaC mt30">
 						<a href="#" class="btnType blue" id="btnpopUpdate" name="btn" 
 						onclick="fn_userEtc();"><span>수정</span></a>
 							<a href=javascript:gfCloseModal() class="btnType gray" id="btnpopClose" name="btn"><span>닫기</span></a>
-						</div> <!-- <input type="hidden" id="totalcnt" name="totalcnt" value ="${totalcnt}"/> -->
+						</div>
 					</td>
 				</tr>
 			</tbody>

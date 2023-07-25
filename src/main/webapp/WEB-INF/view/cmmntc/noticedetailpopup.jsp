@@ -9,7 +9,6 @@
 				<strong>공지사항</strong>
 				</dt>
 				<dd class="content">
-				<!-- s : 여기에 내용입력 -->
 	 <div class="sidescroll" style="height: 400px; overflow: auto !important">
 			<table class="row">
 					<caption>caption</caption>
@@ -54,8 +53,7 @@
 									<a href="javascript:fn_saved();" class="btnType4 grey" id="btnDelete" name="btn"><span>삭제</span></a>
 								</td>	
 							</c:if>
-						</tr>
-			<!-- 댓글 -->			
+						</tr>		
 						<tr>
 								<th colspan="4">댓글</th>
 						</tr>
@@ -114,12 +112,7 @@
 			</dd>
 		</dl>
 		<a href="" class="closePop" id="closeRePop"><span class="hidden">닫기</span></a>
-	<!--  </div> --> 
-<!-- <input type="hidden" id="myForm" name="myForm"/> -->
 <input type="hidden" id="totalcnt" name="totalcnt" value="${totalcnt }"/>
 <input type="hidden" id="action"  name="action"  />
 <input type="hidden" id="rpy_no"  name="rpy_no"  value="${reply.rpy_no}"/> 
 <input type="hidden" id="pageno"  name="pageno"  />
-<%-- <input type="hidden" id="nt_no" name="nt_no" value="${nt_no }"/> --%>
-
-

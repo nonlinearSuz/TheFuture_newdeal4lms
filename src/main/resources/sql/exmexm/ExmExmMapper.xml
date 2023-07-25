@@ -11,7 +11,9 @@
 											,test_name
 
 								from  tb_tests
-						<!-- 						where lec_prof = #{loginId} -->
+								
+								LIMIT #{pageIndex}, #{pageSize}
+
 					
 				</select>
 				
@@ -97,9 +99,7 @@
 								     
 							  where  test_no =  #{test_no}     
 
-							<if test="(pageIndex != null) and (!pageIndex.equals('')) and (pageSize != null) and (!pageSize.equals(''))">
-									LIMIT #{pageIndex}, #{pageSize}
-							</if>
+								LIMIT #{pageIndex}, #{pageSize}
 					
 				</select>
 				

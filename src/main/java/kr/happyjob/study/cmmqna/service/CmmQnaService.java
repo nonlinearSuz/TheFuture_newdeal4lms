@@ -5,7 +5,7 @@ import java.util.Map;
 
 import kr.happyjob.study.cmmqna.model.Qna;
 import kr.happyjob.study.cmmqna.model.QnaReply;
-/*2023-07-11 commit 주석*/
+
 public interface CmmQnaService {
 	
 	//목록 조회

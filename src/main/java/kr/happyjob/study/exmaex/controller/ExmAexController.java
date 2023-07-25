@@ -81,13 +81,12 @@ public class ExmAexController {
       
       List<AttendExamModel> testsearchlist = exmaexService.attendtestlist(paramMap);	
       
-       
+      paramMap.put("test_start", testsearchlist.get(0).getTest_start());
+      paramMap.put("test_end", testsearchlist.get(0).getTest_end());
       
       int totalcnt = exmaexService.countattendtestlist(paramMap);
-   
       
       model.addAttribute("testsearchlist", testsearchlist);
-
       model.addAttribute("totalcnt", totalcnt);
 
       logger.info("+ End " + className + ".attendtestlist");
@@ -116,7 +115,6 @@ public class ExmAexController {
 			int qno = item.getQue_no();
 			qlist += String.valueOf(qno) + ",";
 		} 
-		//예1,2,3,4,6,
 		
 		model.addAttribute("applytestcnt", applytestList.size());
 		model.addAttribute("qlist", qlist);
@@ -193,14 +191,10 @@ public class ExmAexController {
 		
 			paramMap.put("loginID", session.getAttribute("loginId"));
 		
-		// 기존 정답을 조회!
 		List<AttendExamModel> applytestList = exmaexService.applytest(paramMap);
 		
-		// 나의 답을 조회!
 		List<AttendExamModel>  testresultList = exmaexService.testresult(paramMap);
 				
-
-		//기존 리스트
 		model.addAttribute("applytestList", applytestList);
 		model.addAttribute("testresultList", testresultList);
 		
@@ -211,6 +205,10 @@ public class ExmAexController {
 	}
 	
 
+	
+	
+
+	
 	
    
 }

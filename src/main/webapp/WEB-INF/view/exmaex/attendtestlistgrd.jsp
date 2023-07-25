@@ -16,21 +16,24 @@
 									        <td>${list.test_name}</td>
 									        <td>${list.test_start}</td>
 									        <td>${list.test_end}</td>
-									        <td>
-									       		<c:choose>
-												      <c:when test="${not empty list.res_ans }">
-														    <a class="btnType3 color1" href="#">응시완료</a>
-														  </c:when>
-														  <c:otherwise>
-														    <a class="btnType3 color2" href="javascript:fn_applyTest('${list.test_no}','${list.lec_no}');"><span>응시</span></a>
-														  </c:otherwise>
-												</c:choose>
-									        </td>
-									        <td>
-									            <a class="btnType3 color1" href="javascript:fn_resultTest('${list.lec_no}');"><span>결과</span></a>
-									        </td>
-									    </tr>
-									</c:forEach>
+											<c:choose>
+												  <c:when test="${empty list.res_ans}">
+														    <td>
+														     	 <a class="btnType3 color2" href="javascript:fn_applyTest('${list.test_no}','${list.lec_no}');"><span>응시</span></a>
+														    </td>
+														    <td></td>
+												  </c:when>
+												  <c:otherwise>
+												    <td>
+												      <a class="btnType3 color1" href="#">응시완료</a>
+												    </td>
+												    <td>
+												    	  <a class="btnType3 color1" href="javascript:fn_resultTest('${list.lec_no}');"><span>결과</span></a>
+												    </td>
+												 </c:otherwise>
+										</c:choose>
+									 </tr>
+							</c:forEach>
 
 
 								</c:if>

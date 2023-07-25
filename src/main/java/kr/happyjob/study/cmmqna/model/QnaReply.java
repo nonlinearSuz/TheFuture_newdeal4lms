@@ -1,11 +1,11 @@
 package kr.happyjob.study.cmmqna.model;
 
 import lombok.Data;
-/*2023-07-11 commit 주석*/
+
 @Data
 public class QnaReply {
 	
-	private int qna_no; //Q_번호
+	private int qna_no; 
 	public int getQna_no() {
 		return qna_no;
 	}

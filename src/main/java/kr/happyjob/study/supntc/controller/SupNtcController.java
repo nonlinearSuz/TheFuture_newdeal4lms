@@ -32,10 +32,7 @@ public class SupNtcController {
 	
 	private final String className = this.getClass().toString();
 	
-
-	/**
-	 * 초기화면
-	 */
+	//화면
 	@RequestMapping("notice.do")
 	public String notice(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
 			HttpServletResponse response, HttpSession session) throws Exception {
@@ -67,7 +64,8 @@ public class SupNtcController {
 	      List<NoticeModel> noticesearchlist = supNtcService.noticelist(paramMap);
 	      int totalCnt = supNtcService.countnoticelist(paramMap);
 	      
-	      model.addAttribute("noticesearchlist", noticesearchlist); //model에 data 담기 위해 addAttribute 사용
+	      //model에 data 담기 위해 addAttribute 사용
+	      model.addAttribute("noticesearchlist", noticesearchlist); 
 	      model.addAttribute("totalCnt", totalCnt);
 	        
 	      logger.info("+ End " + className + ".noticelist");
@@ -75,7 +73,7 @@ public class SupNtcController {
 	      return "supntc/noticelistgrd";
 	   }
 		
-		// 하나 조회
+		// 상세 조회
 		@RequestMapping("noticeselectone.do")
 		@ResponseBody
 		public Map<String, Object> noticeselectone(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
@@ -86,6 +84,9 @@ public class SupNtcController {
 			
 			// 공지사항 조회
 			NoticeModel noticesearch = supNtcService.noticeselectone(paramMap);
+			
+			String loginID = (String) session.getAttribute("loginId");
+			model.addAttribute("loginId", loginID);
 			
 			// 조회수 증가
 			if(noticesearch != null) {

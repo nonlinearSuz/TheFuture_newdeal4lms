@@ -70,9 +70,9 @@ public class ExmExmController {
       logger.info("+ Start " + className + ".examlist");
       logger.info("   - paramMap : " + paramMap);
       
-		int currentPage = Integer.parseInt((String)paramMap.get("currentPage"));	// 현재 페이지 번호
-		int pageSize = Integer.parseInt((String)paramMap.get("pageSize"));			// 페이지 사이즈
-		int pageIndex = (currentPage-1)*pageSize;												// 페이지 시작 row 번호
+		int currentPage = Integer.parseInt((String)paramMap.get("currentPage"));	
+		int pageSize = Integer.parseInt((String)paramMap.get("pageSize"));			
+		int pageIndex = (currentPage-1)*pageSize;												
       
 		paramMap.put("pageIndex", pageIndex);
 		paramMap.put("pageSize", pageSize);
@@ -166,9 +166,9 @@ public class ExmExmController {
       logger.info("+ Start " + className + ".examdetail");
       logger.info("   - paramMap : " + paramMap);
       
-		int currentPage = Integer.parseInt((String)paramMap.get("currentPage"));	// 현재 페이지 번호
-		int pageSize = Integer.parseInt((String)paramMap.get("pageSize"));			// 페이지 사이즈
-		int pageIndex = (currentPage-1)*pageSize;												// 페이지 시작 row 번호
+		int currentPage = Integer.parseInt((String)paramMap.get("currentPage"));	
+		int pageSize = Integer.parseInt((String)paramMap.get("pageSize"));		
+		int pageIndex = (currentPage-1)*pageSize;												
 		
 
 		paramMap.put("pageIndex", pageIndex);
@@ -250,6 +250,61 @@ public class ExmExmController {
    
 
  
+   
+   
+   
+   
+   /**
+    * vue 초기화면
+    */
+   @RequestMapping("examManagevue.do")
+   public String examManagevue(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+         HttpServletResponse response, HttpSession session) throws Exception {
+      
+      logger.info("+ Start " + className + ".exam");
+      logger.info("   - paramMap : " + paramMap);
+      
+      logger.info("+ End " + className + ".exam");
+
+      return "exmexm/testlistvue";
+   }
+       
+   
+   /**  vue 시험 목록 리스트 조회 */
+   
+   @RequestMapping("testlistvue.do")
+   @ResponseBody
+   public Map<String, Object> testlistvue(Model model, @RequestParam Map<String, Object> paramMap, HttpServletRequest request,
+         HttpServletResponse response, HttpSession session) throws Exception {
+      
+      logger.info("+ Start " + className + ".testlistvue");
+      logger.info("   - paramMap : " + paramMap);
+      
+		int currentPage = Integer.parseInt((String)paramMap.get("currentPage"));	
+		int pageSize = Integer.parseInt((String)paramMap.get("pageSize"));		
+		int pageIndex = (currentPage-1)*pageSize;												
+      
+		paramMap.put("pageIndex", pageIndex);
+		paramMap.put("pageSize", pageSize);
+		
+	   Map<String, Object> returnmap = new HashMap<String, Object>();
+      
+      List<ExamManageModel> examsearchlist = exmexmService.examlist(paramMap);	
+      int totalexam = exmexmService.countexamlist(paramMap);
+      
+      returnmap.put("examsearchlist", examsearchlist);
+      returnmap.put("totalexam", totalexam);
+      
+      
+      logger.info("+ End " + className + ".testlistvue");
+
+      return returnmap; 
+   }
+   
+   
+   
+   
+   
    
    
    

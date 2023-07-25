@@ -5,7 +5,7 @@ import java.util.Map;
 
 import kr.happyjob.study.cmmntc.model.NoticeModel;
 import kr.happyjob.study.cmmntc.model.NoticeReply;
-/*2023-07-11 commit 주석*/
+
 public interface CmmNtcService {
 	
 	public List<NoticeModel> noticelist(Map<String, Object> paramMap) throws Exception;
@@ -35,6 +35,4 @@ public interface CmmNtcService {
 	
 	public int deleteRp(Map<String, Object> paramMap) throws Exception;
 	
-/*	//글을 작성한 유저의 아이디 가져오기
-	public String getWriterId(int nt_no) throws Exception;*/
 }
